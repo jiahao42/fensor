@@ -2,7 +2,7 @@ module github.com/jiahao42/fensor
 
 require (
 	github.com/golang/mock v1.2.0
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.3.5
 	github.com/google/go-cmp v0.2.0
 	github.com/gorilla/websocket v1.4.1
 	github.com/miekg/dns v1.1.4
@@ -17,5 +17,8 @@ require (
 	h12.io/socks v1.0.0
 )
 
-go 1.14
+replace (
+	v2ray.com/core v4.19.1+incompatible => github.com/jiahao42/fensor
+)
 
+go 1.14
