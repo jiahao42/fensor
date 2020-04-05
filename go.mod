@@ -1,4 +1,4 @@
-module v2ray.com/core
+module github.com/jiahao42/fensor
 
 require (
 	github.com/golang/mock v1.2.0
@@ -17,4 +17,5 @@ require (
 	h12.io/socks v1.0.0
 )
 
-go 1.13
+go 1.14
+
