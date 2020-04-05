@@ -1,0 +1,8 @@
+The GFW could return fake IP address while querying DNS server.
+- Google
+- Youtube
+
+Can get correct IP address, but cannot establish TCP connection till time out.
+- Facebook
+
+
