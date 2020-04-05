@@ -18,7 +18,7 @@ require (
 )
 
 replace (
-	v2ray.com/core v4.19.1+incompatible => github.com/jiahao42/fensor
+	v2ray.com/core v4.19.1+incompatible => .
 )
 
 go 1.14
