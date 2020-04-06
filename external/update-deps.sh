@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pushd $GOPATH/src/v2ray.com/core/external
+pushd $GOPATH/src/github.com/jiahao42/fensor/external
 
 rsync -rv "$GOPATH/src/github.com/lucas-clemente/quic-go/" "./github.com/lucas-clemente/quic-go/"
 rm -rf ./github.com/lucas-clemente/quic-go/\.*
@@ -20,6 +20,6 @@ rm -rf "./github.com/lucas-clemente/quic-go/vendor/"
 
 find . -name "*_test.go" -delete
 find . -name "*.yml" -delete
-find . -name "*.go" -type f -print0 | LC_ALL=C xargs -0 sed -i '' 's#\"github\.com#\"v2ray\.com/core/external/github\.com#g'
+find . -name "*.go" -type f -print0 | LC_ALL=C xargs -0 sed -i '' 's#\"github\.com#\"jiahao42/fensor/external/github\.com#g'
 
 popd
