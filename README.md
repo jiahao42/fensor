@@ -9,7 +9,7 @@ This project is based on [v2ray](https://github.com/v2ray/v2ray-core), and the m
 
 ### On mechanism - adaptive circumvention on the fly 
 
-Every URL will be stored as a tuple `(URL, status)` in a database, fensor will choose different proxy protocol based on the URL status.
+Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor will choose different proxy protocol based on the URL status.
 
 | URL status| Protocol| 
 | ------------- |:-------------:|

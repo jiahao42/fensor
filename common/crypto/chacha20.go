@@ -3,7 +3,9 @@ package crypto
 import (
 	"crypto/cipher"
 
-	"v2ray.com/core/common/crypto/internal"
+	//"v2ray.com/core/common/crypto/internal"
+	"github.com/jiahao42/fensor/common/crypto/internal"
+	//"crypto/interal"
 )
 
 // NewChaCha20Stream creates a new Chacha20 encryption/descryption stream based on give key and IV.

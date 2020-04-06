@@ -9,6 +9,7 @@ import (
 
 	"v2ray.com/core/common"
 	. "v2ray.com/core/common/crypto"
+	//. "github.com/jiahao42/fensor/common/crypto"
 )
 
 func mustDecodeHex(s string) []byte {
