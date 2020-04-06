@@ -3,6 +3,7 @@ module github.com/jiahao42/fensor
 require (
 	github.com/golang/mock v1.2.0
 	github.com/golang/protobuf v1.3.5
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
 	github.com/gorilla/websocket v1.4.1
 	github.com/miekg/dns v1.1.4

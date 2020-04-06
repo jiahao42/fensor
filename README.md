@@ -1,13 +1,13 @@
 # fensor
 
-"fensor" means "f\*\*k censor(ship)"
+"fensor" means "f\*\*k censor(ship)", it's a tool for circumventing censorship.
 
 This project is based on [v2ray](https://github.com/v2ray/v2ray-core), and the modifications are mainly guided by the paper [Incentivizing censorship measurements via circumvention](https://dl.acm.org/doi/abs/10.1145/3230543.3230568) from SIGCOMM'18.
 
 
 ## Modifications
 
-#### On mechanism - adaptive circumvention on the fly 
+### On mechanism - adaptive circumvention on the fly 
 
 Every URL will be stored as a tuple `(URL, status)` in a database, fensor will choose different proxy protocol based on the URL status.
 
@@ -17,7 +17,7 @@ Every URL will be stored as a tuple `(URL, status)` in a database, fensor will c
 | TCP conn. blocked/reset| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[Vmess](https://v2ray.com/en/configuration/protocols/vmess.html) |
 | Wrong/Blank webpage returned| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[Vmess](https://v2ray.com/en/configuration/protocols/vmess.html) |
 
-#### On protocols 
+### On protocols 
 
 <!--* freedom: add global DNS servers, i.e., when there is no valid response from the local DNS server, it shall turn to -->
 

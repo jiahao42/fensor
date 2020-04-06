@@ -3,6 +3,7 @@ package localdns
 import (
 	"v2ray.com/core/common/net"
 	"v2ray.com/core/features/dns"
+	//mdns "github.com/miekg/dns"
 )
 
 // Client is an implementation of dns.Client, which queries localhost for DNS.
@@ -18,6 +19,13 @@ func (*Client) Start() error { return nil }
 
 // Close implements common.Closable.
 func (*Client) Close() error { return nil }
+
+func (*Client) LoadDNSServers() ([]string, error) {
+	// TODO:
+	// This function should load valid DNS server from global DB
+	servers := []string{"8.8.8.8", "8.8.4.4"}
+	return servers, nil
+}
 
 // LookupIP implements Client.
 func (*Client) LookupIP(host string) ([]net.IP, error) {
