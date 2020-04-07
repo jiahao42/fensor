@@ -1,8 +1,8 @@
 {
   "log": {
     "loglevel": "debug",
-    "access": "/var/log/v2ray/client/access.log",
-    "error": "/var/log/v2ray/client/error.log"
+    "access": "/var/log/v2ray/vmess_client_access.log",
+    "error": "/var/log/v2ray/vmess_client_error.log"
   },
   "inbounds": [
     {
