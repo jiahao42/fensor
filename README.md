@@ -22,7 +22,9 @@ Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor 
 <!--* freedom: add global DNS servers, i.e., when there is no valid response from the local DNS server, it shall turn to -->
 
 
-## Playground for development
+## Development
+
+### Playground
 
 1. Make sure you have golang install on your computer, and your `GOPATH` is set properly.
 2. Pull the code by `go get -u github.com/jiahao42/fensor`
@@ -30,3 +32,6 @@ Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor 
 4. Run `fensor/playground/run.sh`, `v2ray` will run as both client and server separately on your computer with the default config file (`inbound.json` and `outbound.json`). Check the status of client and server by using `screen -r v2ray`.
 5. Set your proxy properly (e.g. in your browser) and you are ready to go.
 
+### Test
+
+To test the whole project, run `go test ./...` under the root directory.
