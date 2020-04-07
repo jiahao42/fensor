@@ -29,7 +29,7 @@ Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor 
 1. Make sure you have golang install on your computer, and your `GOPATH` is set properly.
 2. Pull the code by `go get -u github.com/jiahao42/fensor`
 3. Run `fensor/playground/build.sh`, and you shall see two executables: `v2ray` and `v2ctl` under `fensor/playground`. 
-4. Run `fensor/playground/run_{protocol}.sh`, `v2ray` will run as both client and server separately on your computer with the default config file (e.g., `vmess_inbound.json` and `vmess_outbound.json`). Check the status of client and server by using `screen -r v2ray`.
+4. Run `fensor/playground/run_{protocol}.sh`, `v2ray` will run as both client and server separately on your computer with the default config file (e.g., `vmess_client.json` and `vmess_server.json`). Check the status of client and server by using `screen -r v2ray`.
 5. Set your proxy properly (e.g. in your browser) and you are ready to go.
 
 ### Test
