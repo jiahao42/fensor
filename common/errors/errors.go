@@ -5,6 +5,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"fmt"
 
 	"v2ray.com/core/common/log"
 	"v2ray.com/core/common/serial"
@@ -140,6 +141,23 @@ func (err *Error) WriteToLog(opts ...ExportOption) {
 		Severity: GetSeverity(err),
 		Content:  err,
 	})
+}
+
+
+
+// WriteToConsole writes current error into console/terminal
+func (err *Error) WriteToConsole(opts ...ExportOption) {
+	var holder ExportOptionHolder
+
+	for _, opt := range opts {
+		opt(&holder)
+	}
+
+	if holder.SessionID > 0 {
+		err.prefix = append(err.prefix, holder.SessionID)
+	}
+
+	fmt.Println(err)
 }
 
 type ExportOptionHolder struct {
