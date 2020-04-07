@@ -1,0 +1,25 @@
+{
+  "log": {
+    "loglevel": "debug",
+    "access": "/var/log/v2ray/client/access.log",
+    "error": "/var/log/v2ray/client/error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}
