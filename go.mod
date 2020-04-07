@@ -1,8 +1,9 @@
-module github.com/jiahao42/fensor
+module v2ray.com/core
 
 require (
 	github.com/golang/mock v1.2.0
 	github.com/golang/protobuf v1.3.5
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
 	github.com/gorilla/websocket v1.4.1
 	github.com/miekg/dns v1.1.4
@@ -15,7 +16,6 @@ require (
 	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 	google.golang.org/grpc v1.24.0
 	h12.io/socks v1.0.0
-	v2ray.com/core v4.19.1+incompatible
 )
 
 replace v2ray.com/core v4.19.1+incompatible => ./
