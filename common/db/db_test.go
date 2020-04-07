@@ -1,8 +1,8 @@
 package db_test
 
 import (
-	"github.com/jiahao42/fensor/common/db"
-	"github.com/jiahao42/fensor/common/db/model"
+	"v2ray.com/core/common/db"
+	"v2ray.com/core/common/db/model"
 	"testing"
 )
 
@@ -13,6 +13,6 @@ func TestDBConnection(t *testing.T) {
 	pool.InsertRecord(status1)
 	status2, _ := pool.LookupRecord("example.com")
 	if (status1 != status2) {
-		t.Error("DB record doesn't match")
+		t.Error("DB record doesn't match", status1, status2)
 	}
 }
