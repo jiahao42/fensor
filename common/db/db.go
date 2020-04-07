@@ -21,23 +21,36 @@ func (p *Pool) Start(protocol, ip, port string) {
 	}
 }
 
-func (p *Pool) GetConn() (redis.Conn) {
-	return p.pool.Get()
+func (p *Pool) GetConn() (redis.Conn, error) {
+	conn := p.pool.Get()
+	if conn.Err() != nil {
+		return nil, conn.Err()
+	}
+	return conn, nil
 }
 
-func (p *Pool) LookupRecord (URL string) (model.URLStatus, error) {
-	conn := p.GetConn()
+func (p *Pool) LookupRecord (URL string) (*model.URLStatus, error) {
+	conn, err := p.GetConn()
+	if err != nil {
+		return nil, err
+	}
 	defer conn.Close()
+	status := new(model.URLStatus)
 	values, err := redis.Values(conn.Do("HGETALL", URL))
-	var status model.URLStatus
-	err = redis.ScanStruct(values, &status)
-	return status, err
+	err = redis.ScanStruct(values, status)
+	if err != nil {
+		return nil, err
+	}
+	return status, nil
 }
 
-func (p *Pool) InsertRecord (status model.URLStatus) (error) {
-	conn := p.GetConn()
+func (p *Pool) InsertRecord (status *model.URLStatus) (error) {
+	conn, err := p.GetConn()
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
-	_, err := conn.Do("HMSET", status.URL, "URL", status.URL, "Status", status.Status)
+	_, err = conn.Do("HMSET", status.URL, "URL", status.URL, "Status", status.Status)
 	return err
 }
 
