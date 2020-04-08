@@ -60,6 +60,7 @@ func (h *Handler) policy() policy.Session {
 }
 
 func (h *Handler) resolveIP(ctx context.Context, domain string, localAddr net.Address) net.Address {
+	newDebugMsg("freedom: resolveIP")
 	var lookupFunc func(string) ([]net.IP, error) = h.dns.LookupIP
 
 	if h.config.DomainStrategy == Config_USE_IP4 || (localAddr != nil && localAddr.Family().IsIPv4()) {
@@ -108,6 +109,7 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 		}
 	}
 	newError("opening connection to ", destination).WriteToLog(session.ExportIDToError(ctx))
+	newDebugMsg("freedom: org dst = " + destination.String())
 
 	input := link.Reader
 	output := link.Writer
@@ -115,7 +117,8 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 	var conn internet.Connection
 	err := retry.ExponentialBackoff(5, 100).On(func() error {
 		dialDest := destination
-		if h.config.useIP() && dialDest.Address.Family().IsDomain() {
+		//if h.config.useIP() && dialDest.Address.Family().IsDomain() {
+		if dialDest.Address.Family().IsDomain() {
 			ip := h.resolveIP(ctx, dialDest.Address.Domain(), dialer.Address())
 			if ip != nil {
 				dialDest = net.Destination{
@@ -123,6 +126,7 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 					Address: ip,
 					Port:    dialDest.Port,
 				}
+				newDebugMsg("freedom: resolved dst = " + dialDest.String())
 				newError("dialing to to ", dialDest).WriteToLog(session.ExportIDToError(ctx))
 			}
 		}

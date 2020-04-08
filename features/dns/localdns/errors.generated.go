@@ -1,4 +1,4 @@
-package dispatcher
+package localdns
 
 import "v2ray.com/core/common/errors"
 import "os"

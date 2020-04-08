@@ -117,7 +117,6 @@ func startV2Ray() (core.Server, error) {
 	if err != nil {
 		return nil, newError("failed to read config files: [", configFiles.String(), "]").Base(err)
 	}
-
 	server, err := core.New(config)
 	if err != nil {
 		return nil, newError("failed to create server").Base(err)

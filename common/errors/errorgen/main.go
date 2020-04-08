@@ -39,7 +39,7 @@ func main() {
 	fmt.Fprintln(file, "func newError(values ...interface{}) *errors.Error { return errors.New(values...).WithPathObj(errPathObjHolder{}) }")
 	fmt.Fprintln(file, `
 func newDebugMsg(msg string) {
-	f, err := os.OpenFile("/tmp/v2ray_debug.log", os.O_APPEND|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("/tmp/v2ray_debug.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 			panic(err)
 	}
