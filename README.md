@@ -14,8 +14,17 @@ Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor 
 | URL status| Protocol| 
 | ------------- |:-------------:|
 | DNS blocked| [Freedom](https://v2ray.com/en/configuration/protocols/freedom.html) |
-| TCP conn. blocked/reset| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[Vmess](https://v2ray.com/en/configuration/protocols/vmess.html) |
-| Wrong/Blank webpage returned| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[Vmess](https://v2ray.com/en/configuration/protocols/vmess.html) |
+| TCP conn. blocked/reset| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[VMess](https://v2ray.com/en/configuration/protocols/vmess.html) |
+| Wrong/Blank webpage returned| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[VMess](https://v2ray.com/en/configuration/protocols/vmess.html) |
+
+Specifically, each v2ray instance uses one of its proxy protocols (e.g., Freedom and VMess).
+
+![Freedom](./doc/img/v2ray_freedom.png)
+![VMess](./doc/img/v2ray_vmess.png)
+
+Different from v2ray, fensor will choose between proxy protocols dynamically, based on the status of each URL stored in the database.
+
+![fensor](./doc/img/fensor.png)
 
 ### On protocols 
 
