@@ -1,12 +1,21 @@
 package crypto
 
 import "v2ray.com/core/common/errors"
-import "io/ioutil"
+import "os"
+import "time"
 
 type errPathObjHolder struct {}
 func newError(values ...interface{}) *errors.Error { return errors.New(values...).WithPathObj(errPathObjHolder{}) }
 
-		func newDebugMsg(msg string) { 
-			ioutil.WriteFile("/tmp/v2ray_debug.log", []byte(msg), 0644)
-		}
-	
+func newDebugMsg(msg string) {
+	f, err := os.OpenFile("/tmp/v2ray_debug.log", os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+			panic(err)
+	}
+	t := time.Now()
+	ts := t.Format("2006-01-02 15:04:05")
+	defer f.Close()
+	if _, err = f.WriteString(ts + ": " + msg + "\n"); err != nil {
+		panic(err)
+	}
+}

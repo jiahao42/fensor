@@ -31,15 +31,25 @@ func main() {
 	fmt.Fprintln(file, "package", pkg)
 	fmt.Fprintln(file, "")
 	fmt.Fprintln(file, "import \"v2ray.com/core/common/errors\"")
-	fmt.Fprintln(file, "import \"io/ioutil\"")
+	fmt.Fprintln(file, "import \"os\"")
+	fmt.Fprintln(file, "import \"time\"")
 	fmt.Fprintln(file, "")
+	//fmt.Fprintln(file, "const pkg = \"" + pkg + "\"")
 	fmt.Fprintln(file, "type errPathObjHolder struct {}")
 	fmt.Fprintln(file, "func newError(values ...interface{}) *errors.Error { return errors.New(values...).WithPathObj(errPathObjHolder{}) }")
 	fmt.Fprintln(file, `
-		func newDebugMsg(msg string) { 
-			ioutil.WriteFile("/tmp/v2ray_debug.log", []byte(msg), 0644)
-		}
-	`)
+func newDebugMsg(msg string) {
+	f, err := os.OpenFile("/tmp/v2ray_debug.log", os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+			panic(err)
+	}
+	t := time.Now()
+	ts := t.Format("2006-01-02 15:04:05")
+	defer f.Close()
+	if _, err = f.WriteString(ts + ": " + msg + "\n"); err != nil {
+		panic(err)
+	}
+}`)
 
 	file.Close()
 }

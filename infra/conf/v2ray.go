@@ -269,6 +269,8 @@ func (c *OutboundDetourConfig) Build() (*core.OutboundHandlerConfig, error) {
 		settings = ([]byte)(*c.Settings)
 	}
 	rawConfig, err := outboundConfigLoader.LoadWithID(settings, c.Protocol)
+	newDebugMsg(c.Protocol)
+	newDebugMsg(c.Protocol)
 	if err != nil {
 		return nil, newError("failed to parse to outbound detour config.").Base(err)
 	}

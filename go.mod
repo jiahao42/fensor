@@ -6,7 +6,7 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/go-cmp v0.2.0
 	github.com/gorilla/websocket v1.4.1
-	github.com/lucas-clemente/quic-go v0.15.2 // indirect
+	github.com/lucas-clemente/quic-go v0.15.2
 	github.com/miekg/dns v1.1.4
 	github.com/refraction-networking/utls v0.0.0-20190909200633-43c36d3c1f57
 	go.starlark.net v0.0.0-20190919145610-979af19b165c
