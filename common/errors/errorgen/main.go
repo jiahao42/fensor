@@ -33,6 +33,7 @@ func main() {
 	fmt.Fprintln(file, "import \"v2ray.com/core/common/errors\"")
 	fmt.Fprintln(file, "import \"os\"")
 	fmt.Fprintln(file, "import \"time\"")
+	fmt.Fprintln(file, "import \"fmt\"")
 	fmt.Fprintln(file, "")
 	//fmt.Fprintln(file, "const pkg = \"" + pkg + "\"")
 	fmt.Fprintln(file, "type errPathObjHolder struct {}")
@@ -50,6 +51,10 @@ func newDebugMsg(msg string) {
 		panic(err)
 	}
 }`)
-
+	fmt.Fprintln(file, `
+func StructString(class interface{}) string {
+	return fmt.Sprintf("%+v", class)
+}
+`)
 	file.Close()
 }

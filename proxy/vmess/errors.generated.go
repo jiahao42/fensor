@@ -3,6 +3,7 @@ package vmess
 import "v2ray.com/core/common/errors"
 import "os"
 import "time"
+import "fmt"
 
 type errPathObjHolder struct {}
 func newError(values ...interface{}) *errors.Error { return errors.New(values...).WithPathObj(errPathObjHolder{}) }
@@ -19,3 +20,8 @@ func newDebugMsg(msg string) {
 		panic(err)
 	}
 }
+
+func StructString(class interface{}) string {
+	return fmt.Sprintf("%+v", class)
+}
+

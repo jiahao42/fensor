@@ -182,6 +182,7 @@ func New(config *Config) (*Instance, error) {
 		}
 	}
 
+	newDebugMsg(StructString(config))
 	essentialFeatures := []struct {
 		Type     interface{}
 		Instance features.Feature
