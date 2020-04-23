@@ -94,6 +94,7 @@ func (s *Server) processTCP(ctx context.Context, conn internet.Connection, dispa
 		config: s.config,
 		port:   inbound.Gateway.Port,
 	}
+	newDebugMsg("SOCKS server port: " + svrSession.port.String())
 
 	reader := &buf.BufferedReader{Reader: buf.NewReader(conn)}
 	request, err := svrSession.Handshake(reader, conn)

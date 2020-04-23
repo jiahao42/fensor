@@ -186,9 +186,11 @@ func (s *ServerSession) handshake5(nMethod byte, reader io.Reader, writer io.Wri
 	}
 	request.Address = addr
 	request.Port = port
+	newDebugMsg("Socks request addr: " + addr.String() + port.String())
 
 	responseAddress := net.AnyIP
 	responsePort := net.Port(1717)
+	newDebugMsg("Socket reponse addr: " + responseAddress.String() + responsePort.String())
 	if request.Command == protocol.RequestCommandUDP {
 		addr := s.config.Address.AsAddress()
 		if addr == nil {
@@ -297,6 +299,7 @@ func writeSocks5AuthenticationResponse(writer io.Writer, version byte, auth byte
 func writeSocks5Response(writer io.Writer, errCode byte, address net.Address, port net.Port) error {
 	buffer := buf.New()
 	defer buffer.Release()
+	//newDebugMsg("writeSocks5Response: " + port.String()) // 1717
 
 	common.Must2(buffer.Write([]byte{socks5Version, errCode, 0x00 /* reserved */}))
 	if err := addrParser.WriteAddressPort(buffer, address, port); err != nil {

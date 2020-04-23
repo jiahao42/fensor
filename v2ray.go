@@ -17,6 +17,8 @@ import (
 	"v2ray.com/core/features/policy"
 	"v2ray.com/core/features/routing"
 	"v2ray.com/core/features/stats"
+	//"v2ray.com/core/app/proxyman"
+	//"v2ray.com/core/common/net"
 )
 
 // Server is an instance of V2Ray. At any time, there must be at most one Server instance running.
@@ -112,6 +114,7 @@ func AddInboundHandler(server *Instance, config *InboundHandlerConfig) error {
 
 func addInboundHandlers(server *Instance, configs []*InboundHandlerConfig) error {
 	for _, inboundConfig := range configs {
+		newDebugMsg("Inbound config: " + StructString(inboundConfig))
 		if err := AddInboundHandler(server, inboundConfig); err != nil {
 			return err
 		}
@@ -182,7 +185,6 @@ func New(config *Config) (*Instance, error) {
 		}
 	}
 
-	newDebugMsg(StructString(config))
 	essentialFeatures := []struct {
 		Type     interface{}
 		Instance features.Feature
@@ -205,6 +207,17 @@ func New(config *Config) (*Instance, error) {
 		return nil, newError("not all dependency are resolved.")
 	}
 
+	//config.Inbound = config.Inbound[:1]
+	//config.Outbound = config.Outbound[:1] 
+	//newconf := serial.ToTypedMessage(&proxyman.ReceiverConfig{
+		//PortRange: net.SinglePortRange(54321),
+		//Listen: net.NewIPOrDomain(net.LocalHostIP),
+	//})
+	//config.Inbound[0].ReceiverSettings = newconf
+	//my_conf := config.Inbound[0].ReceiverSettings
+	//val, _ := my_conf.GetInstance()
+	//newDebugMsg("Inbound config: " + StructString(val))
+	//newDebugMsg(reflect.TypeOf(val).String())
 	if err := addInboundHandlers(server, config.Inbound); err != nil {
 		return nil, err
 	}
@@ -213,6 +226,7 @@ func New(config *Config) (*Instance, error) {
 		return nil, err
 	}
 
+	//newDebugMsg(StructString(server))
 	return server, nil
 }
 

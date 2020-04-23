@@ -107,16 +107,7 @@ func GetConfigFormat() string {
 	}
 }
 
-func startV2Ray() (core.Server, error) {
-	configFiles, err := getConfigFilePath()
-	if err != nil {
-		return nil, err
-	}
-
-	config, err := core.LoadConfig(GetConfigFormat(), configFiles[0], configFiles)
-	if err != nil {
-		return nil, newError("failed to read config files: [", configFiles.String(), "]").Base(err)
-	}
+func startV2Ray(config *core.Config) (core.Server, error) {
 	server, err := core.New(config)
 	if err != nil {
 		return nil, newError("failed to create server").Base(err)
@@ -132,17 +123,37 @@ func printVersion() {
 	}
 }
 
-func main() {
-
-	flag.Parse()
-
-	printVersion()
-
-	if *version {
-		return
+func handleHybridConfig() ([]*core.Config, error) {
+	configFiles, err := getConfigFilePath()
+	if err != nil {
+		return nil, err
 	}
 
-	server, err := startV2Ray()
+	config, err := core.LoadConfig(GetConfigFormat(), configFiles[0], configFiles)
+	if err != nil {
+		return nil, newError("failed to read config files: [", configFiles.String(), "]").Base(err)
+	}
+
+	ret := make([]*core.Config, 0, 2)
+	if len(config.Inbound) > 1 { // hybrid
+		_config1 := *config
+		config1 := &_config1
+		config1.Inbound = config.Inbound[:1]
+		config1.Outbound = config.Outbound[:1]
+		_config2 := *config
+		config2 := &_config2
+		config2.Inbound = config.Inbound[1:2]
+		config2.Outbound = config.Outbound[1:2]
+		ret = append(ret, config1)
+		ret = append(ret, config2)
+	} else { // v2ray default
+		ret = append(ret, config)
+	}
+	return ret, nil
+}
+
+func startV2RayWrapper(config *core.Config) (core.Server) {
+	server, err := startV2Ray(config)
 	if err != nil {
 		fmt.Println(err)
 		// Configuration error. Exit with a special value to prevent systemd from restarting.
@@ -158,7 +169,28 @@ func main() {
 		fmt.Println("Failed to start", err)
 		os.Exit(-1)
 	}
-	defer server.Close()
+	return server
+}
+
+func main() {
+
+	flag.Parse()
+
+	printVersion()
+
+	if *version {
+		return
+	}
+	configs, _ := handleHybridConfig()
+
+	server1 := startV2RayWrapper(configs[0])
+	fmt.Println("server1 started")
+	if len(configs) > 1 {
+		server2 := startV2RayWrapper(configs[1])
+		fmt.Println("server2 started")
+		defer server2.Close()
+	}
+	defer server1.Close()
 
 	// Explicitly triggering GC to remove garbage from config loading.
 	runtime.GC()
