@@ -1,0 +1,33 @@
+{
+  "log": {
+    "loglevel": "debug",
+    "access": "/var/log/v2ray/dokodemo_access.log",
+    "error": "/var/log/v2ray/dokodemo_error.log"
+  },
+  "inbounds": [
+    {
+      "port": 54321,
+      "listen": "0.0.0.0",
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 1080,
+        "network": "tcp,udp",
+        "followRedirect": false
+      },
+      "tag": "",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}

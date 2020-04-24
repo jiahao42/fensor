@@ -6,48 +6,61 @@
   },
   "inbounds": [
     {
-      "port": 1080,
+      "port": 1081,
       "protocol": "socks",
       "sniffing": {
         "enabled": true,
-        "destOverride": ["http", "tls"]
+        "destOverride": [
+          "http",
+          "tls"
+        ]
       },
       "settings": {
         "auth": "noauth"
       }
     },
-		{
-			"port": 1081,
-			"protocol": "socks",
-			"sniffing": {
-				"enabled": true,
-				"destOverride": ["http", "tls"]
-			},
-			"setting": {
-				"auth": "noauth"
-			}
-		}
+    {
+      "port": 1082,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "setting": {
+        "auth": "noauth"
+      }
+    },
+    {
+      "port": 1080,
+      "protocol": "socks"
+    }
   ],
   "outbounds": [
-		{
-			"protocol": "freedom"
-		},
     {
-      "protocol": "vmess", 
+      "protocol": "freedom"
+    },
+    {
+      "protocol": "vmess",
       "settings": {
         "vnext": [
           {
-            "address": "127.0.0.1", 
-            "port": 12345,  
+            "address": "127.0.0.1",
+            "port": 12345,
             "users": [
               {
-                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",  
-                "alterId": 64 
+                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",
+                "alterId": 64
               }
             ]
           }
         ]
       }
+    },
+    {
+      "protocol": "freedom"
     }
   ]
 }
