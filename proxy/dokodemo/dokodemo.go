@@ -37,6 +37,7 @@ type DokodemoDoor struct {
 	config        *Config
 	address       net.Address
 	port          net.Port
+  relayport     net.Port
 }
 
 // Init initializes the DokodemoDoor instance with necessary parameters.
@@ -47,6 +48,7 @@ func (d *DokodemoDoor) Init(config *Config, pm policy.Manager) error {
 	d.config = config
 	d.address = config.GetPredefinedAddress()
 	d.port = net.Port(config.Port)
+  d.relayport = net.Port(config.RelayPort)
 	d.policyManager = pm
 
   newDebugMsg("DokodemoDoor: " + StructString(d.address))
