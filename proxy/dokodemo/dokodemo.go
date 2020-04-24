@@ -49,6 +49,9 @@ func (d *DokodemoDoor) Init(config *Config, pm policy.Manager) error {
 	d.port = net.Port(config.Port)
 	d.policyManager = pm
 
+  newDebugMsg("DokodemoDoor: " + StructString(d.address))
+  newDebugMsg("DokodemoDoor: " + StructString(config.Port))
+
 	return nil
 }
 

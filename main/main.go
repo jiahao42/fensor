@@ -14,11 +14,14 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+  "regexp"
 
 	"v2ray.com/core"
+  //"v2ray.com/core/common/serial"
 	"v2ray.com/core/common/cmdarg"
 	"v2ray.com/core/common/platform"
 	_ "v2ray.com/core/main/distro/all"
+  socks5 "github.com/armon/go-socks5"
 )
 
 var (
@@ -134,8 +137,9 @@ func handleHybridConfig() ([]*core.Config, error) {
 		return nil, newError("failed to read config files: [", configFiles.String(), "]").Base(err)
 	}
 
-	ret := make([]*core.Config, 0, 2)
-	if len(config.Inbound) > 1 { // hybrid
+  //newDebugMsg("Config: " + StructString(config))
+	ret := make([]*core.Config, 0, 3)
+	if len(config.Inbound) == 3 { // hybrid
 		_config1 := *config
 		config1 := &_config1
 		config1.Inbound = config.Inbound[:1]
@@ -144,8 +148,13 @@ func handleHybridConfig() ([]*core.Config, error) {
 		config2 := &_config2
 		config2.Inbound = config.Inbound[1:2]
 		config2.Outbound = config.Outbound[1:2]
+    _config3 := *config
+    config3 := &_config3
+    config3.Inbound = config.Inbound[2:3]
+    config3.Outbound = config.Outbound[2:3]
 		ret = append(ret, config1)
 		ret = append(ret, config2)
+    ret = append(ret, config3)
 	} else { // v2ray default
 		ret = append(ret, config)
 	}
@@ -172,6 +181,18 @@ func startV2RayWrapper(config *core.Config) (core.Server) {
 	return server
 }
 
+func runSOCKS5Server(addr string) {
+  conf := &socks5.Config{}
+  server, err := socks5.New(conf)
+  if err != nil {
+    panic(err)
+  }
+
+  if err := server.ListenAndServe("tcp", addr); err != nil {
+    panic(err)
+  }
+}
+
 func main() {
 
 	flag.Parse()
@@ -181,16 +202,38 @@ func main() {
 	if *version {
 		return
 	}
-	configs, _ := handleHybridConfig()
+	configs, err := handleHybridConfig()
+  if err != nil {
+    panic("Load config failed")
+  }
 
 	server1 := startV2RayWrapper(configs[0])
-	fmt.Println("server1 started")
-	if len(configs) > 1 {
+  //newDebugMsg("Main: " + StructString(configs[0].Inbound[0].ReceiverSettings))
+  //msg := configs[0].Inbound[0].ReceiverSettings
+  //instance := msg.GetValue()
+  //instancexx, _ := msg.GetInstance()
+  //newDebugMsg("fuck " + instancexx.String())
+  //newDebugMsg("fuck " + StructString(msg))
+  //newDebugMsg("fuck " + StructString(instance))
+	//fmt.Println("server1 started")
+
+	if len(configs) == 3 {
+    re := regexp.MustCompile(`From:([0-9]+)`)
+    config1, _ := configs[0].Inbound[0].ReceiverSettings.GetInstance()
+    port1 := string(re.FindSubmatch([]byte(config1.String()))[1])
+    config2, _ := configs[1].Inbound[0].ReceiverSettings.GetInstance()
+    port2 := string(re.FindSubmatch([]byte(config2.String()))[1])
+    config3, _ := configs[2].Inbound[0].ReceiverSettings.GetInstance()
+    port3 := string(re.FindSubmatch([]byte(config3.String()))[1])
+    newDebugMsg("Main: port " + port1 + ", " + port2 + ", " + port3)
+    runSOCKS5Server("localhost:" + port3)
+
 		server2 := startV2RayWrapper(configs[1])
 		fmt.Println("server2 started")
 		defer server2.Close()
 	}
 	defer server1.Close()
+  //controller_config := configs[2]
 
 	// Explicitly triggering GC to remove garbage from config loading.
 	runtime.GC()

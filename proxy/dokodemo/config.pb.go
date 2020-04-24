@@ -21,6 +21,7 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 type Config struct {
 	Address *net.IPOrDomain `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Port    uint32          `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+  Port1    uint32          `protobuf:"varint,2,opt,name=port1,proto3" json:"port,omitempty"`
 	// List of networks that the Dokodemo accepts.
 	// Deprecated. Use networks.
 	NetworkList *net.NetworkList `protobuf:"bytes,3,opt,name=network_list,json=networkList,proto3" json:"network_list,omitempty"` // Deprecated: Do not use.

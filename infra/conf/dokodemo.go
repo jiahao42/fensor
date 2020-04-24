@@ -8,6 +8,7 @@ import (
 type DokodemoConfig struct {
 	Host         *Address     `json:"address"`
 	PortValue    uint16       `json:"port"`
+  PortValue1   uint16       `json:"port1"`
 	NetworkList  *NetworkList `json:"network"`
 	TimeoutValue uint32       `json:"timeout"`
 	Redirect     bool         `json:"followRedirect"`
@@ -20,6 +21,7 @@ func (v *DokodemoConfig) Build() (proto.Message, error) {
 		config.Address = v.Host.Build()
 	}
 	config.Port = uint32(v.PortValue)
+  config.Port1 = uint32(v.PortValue1)
 	config.Networks = v.NetworkList.Build()
 	config.Timeout = v.TimeoutValue
 	config.FollowRedirect = v.Redirect
