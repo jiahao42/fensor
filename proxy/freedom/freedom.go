@@ -60,8 +60,8 @@ func (h *Handler) policy() policy.Session {
 }
 
 func (h *Handler) resolveIP(ctx context.Context, domain string, localAddr net.Address) net.Address {
-	newDebugMsg("freedom: resolving IP for: " + domain)
 	var lookupFunc func(string) ([]net.IP, error) = h.dns.LookupIP
+  var globalLookupFunc func(string) ([]net.IP) = h.dns.GlobalLookupIP
 
 	if h.config.DomainStrategy == Config_USE_IP4 || (localAddr != nil && localAddr.Family().IsIPv4()) {
 		if lookupIPv4, ok := h.dns.(dns.IPv4Lookup); ok {
@@ -74,10 +74,13 @@ func (h *Handler) resolveIP(ctx context.Context, domain string, localAddr net.Ad
 	}
 
 	ips, err := lookupFunc(domain)
+	newDebugMsg("Freedom: resolving IP using predefined DNS server for: " + domain)
 	if err != nil {
-		newError("failed to get IP address for domain ", domain).Base(err).WriteToLog(session.ExportIDToError(ctx))
+		newError("failed to get IP address for domain from predefined DNS server", domain).Base(err).WriteToLog(session.ExportIDToError(ctx))
+	  newDebugMsg("Freedom: resolving IP using global DNS server for: " + domain)
+    ips = globalLookupFunc(domain) // Now try use global DNS server
 	}
-	if len(ips) == 0 {
+	if len(ips) == 0 { // Still no ip address found
 		return nil
 	}
 	return net.IPAddress(ips[dice.Roll(len(ips))])
@@ -115,7 +118,7 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 	output := link.Writer
 
 	var conn internet.Connection
-	err := retry.ExponentialBackoff(5, 100).On(func() error {
+	err := retry.ExponentialBackoff(3, 100).On(func() error {
 		dialDest := destination
 		if h.config.useIP() && dialDest.Address.Family().IsDomain() {
 			ip := h.resolveIP(ctx, dialDest.Address.Domain(), dialer.Address())
@@ -128,9 +131,11 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 				newDebugMsg("freedom: resolved dst = " + dialDest.String())
 				newError("dialing to to ", dialDest).WriteToLog(session.ExportIDToError(ctx))
 			} else {
+        // TODO: use GlobalDNS, if still no IP, then record url in DB
 				newDebugMsg("freedom: IP not found for domain " + dialDest.Address.Domain())
 			}
-		} 
+    }
+
     //else {
 			//newDebugMsg("freedom: Not valid domain " + destination.Address.Domain())
 		//}

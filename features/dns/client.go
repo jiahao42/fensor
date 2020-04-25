@@ -15,6 +15,7 @@ type Client interface {
 
 	// LookupIP returns IP address for the given domain. IPs may contain IPv4 and/or IPv6 addresses.
 	LookupIP(domain string) ([]net.IP, error)
+  GlobalLookupIP(domain string) ([]net.IP)
 }
 
 // IPv4Lookup is an optional feature for querying IPv4 addresses only.

@@ -148,15 +148,11 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
     //newDebugMsg("DokodemoDoor: read " + mb.String())
     //link.Writer.WriteMultiBuffer(mb)
     newDebugMsg("Dokodemo: request")
-    buffer, err := buf.CopyReturn(reader, link.Writer, buf.UpdateActivity(timer))
+    _, err := buf.SmartCopy(reader, link.Writer, buf.UpdateActivity(timer))
     if err != nil {
       return newError("failed to transport request").Base(err)
     }
-    newDebugMsg("Dokodemo: request buffer " + buffer)
 
-    //if buffer[:3] == "\x05\x00\x00" {
-      //newDebugMsg(buffer[3:8])
-    //}
 		return nil
 	}
 
@@ -207,15 +203,10 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		defer timer.SetTimeout(plcy.Timeouts.UplinkOnly)
 
     // Write to the forwarded address
-    buffer, err := buf.CopyReturn(link.Reader, writer, buf.UpdateActivity(timer))
+    _, err := buf.SmartCopy(link.Reader, writer, buf.UpdateActivity(timer))
 		if err != nil {
 			return newError("failed to transport response").Base(err)
 		}
-    newDebugMsg("FUCK " + buffer)
-    //if []byte(buffer[:3]) == []byte{"\x05\x00\x00"} {
-      //newDebugMsg(buffer[3:8])
-    //}
-    //mb, _ := link.Reader.ReadMultiBuffer()
 		return nil
 	}
 

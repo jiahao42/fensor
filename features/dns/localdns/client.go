@@ -3,6 +3,7 @@ package localdns
 import (
 	"v2ray.com/core/common/net"
 	"v2ray.com/core/features/dns"
+  mdns "github.com/miekg/dns"
 )
 
 // Client is an implementation of dns.Client, which queries localhost for DNS.
@@ -14,7 +15,7 @@ func (*Client) Type() interface{} {
 }
 
 // Start implements common.Runnable.
-func (*Client) Start() error { 
+func (*Client) Start() error {
 	//newDebugMsg("localdns server started")
 	return nil
 }
@@ -22,9 +23,33 @@ func (*Client) Start() error {
 // Close implements common.Closable.
 func (*Client) Close() error { return nil }
 
+// TODO: we can use different DNS servers according to user's contury info, see https://public-dns.info/
+var globalDNSServers = []string{
+  "8.8.8.8",
+  "8.8.4.4",
+  "23.226.80.100",
+}
+
+// Lookup IP using global servers
+func (*Client) GlobalLookupIP (host string) ([]net.IP) {
+  ret := []net.IP{}
+  for _, server := range globalDNSServers {
+    //newDebugMsg("feature: resolving IP for " + host + ", using " + server)
+    c := mdns.Client{}
+    m := mdns.Msg{}
+    m.SetQuestion(host + ".", mdns.TypeA)
+    r, _, _ := c.Exchange(&m, server+":53")
+    for _, ans := range r.Answer {
+        Arecord := ans.(*mdns.A)
+        ret = append(ret, Arecord.A)
+    }
+  }
+  return ret
+}
+
 // LookupIP implements Client.
 func (*Client) LookupIP(host string) ([]net.IP, error) {
-	newDebugMsg("feature: resolving IP for: " + host)
+	//newDebugMsg("feature: resolving IP for: " + host)
 	ips, err := net.LookupIP(host)
 	if err != nil {
 		return nil, err
