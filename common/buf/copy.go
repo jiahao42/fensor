@@ -3,10 +3,11 @@ package buf
 import (
 	"io"
 	"time"
-  //"net/url"
+  "net/url"
   //"net"
   "fmt"
   "strings"
+  //"strconv"
 
 	"v2ray.com/core/common/errors"
 	"v2ray.com/core/common/signal"
@@ -115,9 +116,9 @@ func smartCopyInternal(reader Reader, writer Writer, handler *copyHandler) (stri
 				handler(buffer)
         str := buffer.String()
         ret += str
-        newDebugMsg(str)
+        //newDebugMsg(str)
         if len(str) > 3 && str[:3] == "\x05\x01\x00" {
-          newDebugMsg(str[3:])
+          //newDebugMsg(str[3:])
           addrType := str[3]
           if addrType == byte('\x01') { // IPv4
             arr := make([]string, 4, 4)
@@ -128,6 +129,12 @@ func smartCopyInternal(reader Reader, writer Writer, handler *copyHandler) (stri
             ipStr := strings.Join(arr, ".")
             newDebugMsg("Buf: parsed ip " + ipStr)
           } else if addrType == byte('\x03') { // domain
+            addrLen := int(str[4])
+            rawDomain := str[5:5+addrLen]
+            newDebugMsg("Buf: raw domain " + rawDomain)
+            u := &url.URL{}
+            u.UnmarshalBinary([]byte(rawDomain))
+            newDebugMsg("Buf: parsed domain " + u.String())
             //urlAddr := url.URL{}
             //urlAddr.UnmarshalBinary([]byte(str[4:8]))
           }
