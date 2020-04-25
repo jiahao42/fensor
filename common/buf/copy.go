@@ -3,6 +3,10 @@ package buf
 import (
 	"io"
 	"time"
+  //"net/url"
+  //"net"
+  "fmt"
+  "strings"
 
 	"v2ray.com/core/common/errors"
 	"v2ray.com/core/common/signal"
@@ -95,25 +99,53 @@ func copyInternal(reader Reader, writer Writer, handler *copyHandler) error {
 	}
 }
 
-func copyReturnInternal(reader Reader, writer Writer, handler *copyHandler) (string, error) {
+// smartCopy
+func smartCopyInternal(reader Reader, writer Writer, handler *copyHandler) (string, error) {
+  //stage := 0
   ret := ""
   for {
 		buffer, err := reader.ReadMultiBuffer()
+    // TODO:
+    // 1. read until get URL
+    // 2. call DB to see if the URL is blocked
+    // 3. if yes, break and return error, then try another relay server
+    // 4. if no, continue using this socks
 		if !buffer.IsEmpty() {
 			for _, handler := range handler.onData {
-        ret += buffer.String()
-        //newDebugMsg("Buf: copyReturnInternal " + StructString(len(ret)))
 				handler(buffer)
+        str := buffer.String()
+        ret += str
+        newDebugMsg(str)
+        if len(str) > 3 && str[:3] == "\x05\x01\x00" {
+          newDebugMsg(str[3:])
+          addrType := str[3]
+          if addrType == byte('\x01') { // IPv4
+            arr := make([]string, 4, 4)
+            newDebugMsg("Buf: raw ip " + str[4:8])
+            for i, b := range []byte(str[4:8]) {
+              arr[i] = fmt.Sprintf("%d", b)
+            }
+            ipStr := strings.Join(arr, ".")
+            newDebugMsg("Buf: parsed ip " + ipStr)
+          } else if addrType == byte('\x03') { // domain
+            //urlAddr := url.URL{}
+            //urlAddr.UnmarshalBinary([]byte(str[4:8]))
+          }
+        }
+        //if stage == 0 && str == "\x05\x01\x00" {
+          //stage = 1
+          //newDebugMsg(StructString(stage) + "STAGE 1!")
+        //}
+        //if stage == 1 && str == "\x05\x00" {
+          //stage = 2
+          //newDebugMsg("STAGE 2!")
+        //} else if stage == 2 {
+          //newDebugMsg("STAGE 3!")
+        //}
+        //if str == "\x05\x00" {
+          //newDebugMsg(StructString(stage) + "SHIT!")
+        //}
 			}
-      // TODO:
-      // 1. read until get URL
-      // 2. call DB to see if the URL is blocked
-      // 3. if yes, break and return error, then try another relay server
-      // 4. if no, continue using this socks
-      str := buffer.String()
-      if str == "\x05\x01\x00" {
-        newDebugMsg("SHIT!")
-      }
 
 			if werr := writer.WriteMultiBuffer(buffer); werr != nil {
         newDebugMsg("Buf: copyReturnInternal writeError")
@@ -143,12 +175,12 @@ func Copy(reader Reader, writer Writer, options ...CopyOption) error {
 	return nil
 }
 
-func CopyReturn(reader Reader, writer Writer, options ...CopyOption) (string, error) {
+func SmartCopy(reader Reader, writer Writer, options ...CopyOption) (string, error) {
 	var handler copyHandler
 	for _, option := range options {
 		option(&handler)
 	}
-	buffer, err := copyReturnInternal(reader, writer, &handler)
+	buffer, err := smartCopyInternal(reader, writer, &handler)
 	if err != nil && errors.Cause(err) != io.EOF {
 		return buffer, err
 	}
