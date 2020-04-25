@@ -11,6 +11,7 @@ import (
 
 	"v2ray.com/core/common/errors"
 	"v2ray.com/core/common/signal"
+  "v2ray.com/core/common/db"
 )
 
 type dataHandler func(MultiBuffer)
@@ -104,6 +105,8 @@ func copyInternal(reader Reader, writer Writer, handler *copyHandler) error {
 func smartCopyInternal(reader Reader, writer Writer, handler *copyHandler) (string, error) {
   //stage := 0
   ret := ""
+  pool := db.New()
+  pool.Start("tcp", "localhost", "6379")
   for {
 		buffer, err := reader.ReadMultiBuffer()
     // TODO:
@@ -134,7 +137,16 @@ func smartCopyInternal(reader Reader, writer Writer, handler *copyHandler) (stri
             newDebugMsg("Buf: raw domain " + rawDomain)
             u := &url.URL{}
             u.UnmarshalBinary([]byte(rawDomain))
-            newDebugMsg("Buf: parsed domain " + u.String())
+            domain := u.String()
+            newDebugMsg("Buf: parsed domain " + domain)
+            status, err := pool.LookupRecord(domain)
+            if err != nil {
+              // status not found
+              // Do nothing, leave it to the freedom protocol
+              newDebugMsg("Buf: domain not found " + domain)
+            } else {
+              newDebugMsg("Buf: domain found " + StructString(status))
+            }
             //urlAddr := url.URL{}
             //urlAddr.UnmarshalBinary([]byte(str[4:8]))
           }
