@@ -87,6 +87,12 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		Address: d.address,
 		Port:    d.port,
 	}
+	relayDest := net.Destination{
+		Network: network,
+		Address: d.address,
+		Port:    d.relayport,
+	}
+  newDebugMsg("Dokodemo: dest0 " + StructString(dest))
 
 	destinationOverridden := false
 	if d.config.FollowRedirect {
@@ -117,6 +123,9 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 
 	ctx = policy.ContextWithBufferPolicy(ctx, plcy.Buffer)
 	link, err := dispatcher.Dispatch(ctx, dest)
+  relayLink, err := dispatcher.Dispatch(ctx, relayDest)
+  if relayLink != nil {}
+
 	if err != nil {
 		return newError("failed to dispatch request").Base(err)
 	}
@@ -135,10 +144,19 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		} else {
 			reader = buf.NewReader(conn)
 		}
-		if err := buf.Copy(reader, link.Writer, buf.UpdateActivity(timer)); err != nil {
-			return newError("failed to transport request").Base(err)
-		}
+    //mb, _ := reader.ReadMultiBuffer()
+    //newDebugMsg("DokodemoDoor: read " + mb.String())
+    //link.Writer.WriteMultiBuffer(mb)
+    newDebugMsg("Dokodemo: request")
+    buffer, err := buf.CopyReturn(reader, link.Writer, buf.UpdateActivity(timer))
+    if err != nil {
+      return newError("failed to transport request").Base(err)
+    }
+    newDebugMsg("Dokodemo: request buffer " + buffer)
 
+    //if buffer[:3] == "\x05\x00\x00" {
+      //newDebugMsg(buffer[3:8])
+    //}
 		return nil
 	}
 
@@ -155,7 +173,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 			writer = &buf.SequentialWriter{Writer: conn}
 		} else {
 			sockopt := &internet.SocketConfig{
-				Tproxy: internet.SocketConfig_TProxy,
+			  Tproxy: internet.SocketConfig_TProxy,
 			}
 			if dest.Address.Family().IsIP() {
 				sockopt.BindAddress = dest.Address.IP()
@@ -176,6 +194,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 						timer.SetTimeout(plcy.Timeouts.DownlinkOnly)
 					}
 				}()
+        newDebugMsg("Dokodemo: TPROXY mode")
 				if err := buf.Copy(tReader, link.Writer, buf.UpdateActivity(timer)); err != nil {
 					return newError("failed to transport request (TPROXY conn)").Base(err)
 				}
@@ -187,9 +206,16 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 	responseDone := func() error {
 		defer timer.SetTimeout(plcy.Timeouts.UplinkOnly)
 
-		if err := buf.Copy(link.Reader, writer, buf.UpdateActivity(timer)); err != nil {
+    // Write to the forwarded address
+    buffer, err := buf.CopyReturn(link.Reader, writer, buf.UpdateActivity(timer))
+		if err != nil {
 			return newError("failed to transport response").Base(err)
 		}
+    newDebugMsg("FUCK " + buffer)
+    //if []byte(buffer[:3]) == []byte{"\x05\x00\x00"} {
+      //newDebugMsg(buffer[3:8])
+    //}
+    //mb, _ := link.Reader.ReadMultiBuffer()
 		return nil
 	}
 
