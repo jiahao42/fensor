@@ -90,7 +90,10 @@ func (h *Handler) resolveIP(ctx context.Context, domain string, localAddr net.Ad
     status := &model.URLStatus{domain, model.DNS_BLOCKED}
     h.pool.InsertRecord(status)
 		return nil
-	}
+	} else {
+    status := &model.URLStatus{domain, model.GOOD}
+    h.pool.InsertRecord(status)
+  }
 	return net.IPAddress(ips[dice.Roll(len(ips))])
 }
 

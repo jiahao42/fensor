@@ -17,6 +17,7 @@ import (
 	"v2ray.com/core/common/session"
 	"v2ray.com/core/common/signal"
 	"v2ray.com/core/common/task"
+  "v2ray.com/core/common/db"
 	"v2ray.com/core/features/policy"
 	"v2ray.com/core/features/routing"
 	"v2ray.com/core/transport/internet"
@@ -38,6 +39,7 @@ type DokodemoDoor struct {
 	address       net.Address
 	port          net.Port
   relayport     net.Port
+  pool          *db.Pool
 }
 
 // Init initializes the DokodemoDoor instance with necessary parameters.
@@ -50,8 +52,10 @@ func (d *DokodemoDoor) Init(config *Config, pm policy.Manager) error {
 	d.port = net.Port(config.Port)
   d.relayport = net.Port(config.RelayPort)
 	d.policyManager = pm
+  d.pool = db.New()
+  d.pool.Start("tcp", "localhost", "6379")
 
-  newDebugMsg("DokodemoDoor: " + StructString(d.port))
+  //newDebugMsg("DokodemoDoor: " + StructString(d.port))
   newDebugMsg("DokodemoDoor: Port " + StructString(config.Port) + ", " + StructString(config.RelayPort))
 
 	return nil
@@ -148,7 +152,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
     //newDebugMsg("DokodemoDoor: read " + mb.String())
     //link.Writer.WriteMultiBuffer(mb)
     newDebugMsg("Dokodemo: request")
-    _, err := buf.SmartCopy(reader, link.Writer, buf.UpdateActivity(timer))
+    _, err := buf.SmartCopy(reader, link.Writer, d.pool, buf.UpdateActivity(timer))
     if err != nil {
       return newError("failed to transport request").Base(err)
     }
@@ -203,7 +207,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		defer timer.SetTimeout(plcy.Timeouts.UplinkOnly)
 
     // Write to the forwarded address
-    _, err := buf.SmartCopy(link.Reader, writer, buf.UpdateActivity(timer))
+    _, err := buf.SmartCopy(link.Reader, writer, d.pool, buf.UpdateActivity(timer))
 		if err != nil {
 			return newError("failed to transport response").Base(err)
 		}
