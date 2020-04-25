@@ -39,7 +39,7 @@ Different from v2ray, fensor will choose between proxy protocols dynamically, ba
 2. Pull the code by `go get -u github.com/jiahao42/fensor`
 3. Run `fensor/playground/build.sh`, and you shall see two executables: `v2ray` and `v2ctl` under `fensor/playground`. 
 4. Run `fensor/playground/run_{protocol}.sh`, `v2ray` will run as both client and server separately on your computer with the default config file (e.g., `vmess_client.json` and `vmess_server.json`). Check the status of client and server by using `screen -r v2ray`.
-5. Set your proxy properly (e.g. in your browser) and you are ready to go.
+5. Set your proxy properly (e.g. in your browser) and you are ready to go. Note that in Firefox, you have to check `Proxy DNS when using SOCKS v5`, as we need to do DNS lookup in fensor instead of browser. 
 
 ### Test
 
