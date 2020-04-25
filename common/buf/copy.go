@@ -97,23 +97,36 @@ func copyInternal(reader Reader, writer Writer, handler *copyHandler) error {
 
 func copyReturnInternal(reader Reader, writer Writer, handler *copyHandler) (string, error) {
   ret := ""
-	for {
+  for {
 		buffer, err := reader.ReadMultiBuffer()
 		if !buffer.IsEmpty() {
 			for _, handler := range handler.onData {
         ret += buffer.String()
+        //newDebugMsg("Buf: copyReturnInternal " + StructString(len(ret)))
 				handler(buffer)
 			}
+      // TODO:
+      // 1. read until get URL
+      // 2. call DB to see if the URL is blocked
+      // 3. if yes, break and return error, then try another relay server
+      // 4. if no, continue using this socks
+      str := buffer.String()
+      if str == "\x05\x01\x00" {
+        newDebugMsg("SHIT!")
+      }
 
 			if werr := writer.WriteMultiBuffer(buffer); werr != nil {
-				return "", writeError{werr}
+        newDebugMsg("Buf: copyReturnInternal writeError")
+				return ret, writeError{werr}
 			}
 		}
 
 		if err != nil {
-			return "", readError{err}
+      newDebugMsg("Buf: copyReturnInternal readError")
+			return ret, readError{err}
 		}
-	}
+  }
+  //newDebugMsg("Buf: copyReturnInternal " + ret)
   return ret, nil
 }
 
@@ -137,8 +150,9 @@ func CopyReturn(reader Reader, writer Writer, options ...CopyOption) (string, er
 	}
 	buffer, err := copyReturnInternal(reader, writer, &handler)
 	if err != nil && errors.Cause(err) != io.EOF {
-		return "", err
+		return buffer, err
 	}
+  //newDebugMsg("Buf: CopyReturn " + buffer)
 	return buffer, nil
 }
 
