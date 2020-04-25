@@ -95,6 +95,28 @@ func copyInternal(reader Reader, writer Writer, handler *copyHandler) error {
 	}
 }
 
+func copyReturnInternal(reader Reader, writer Writer, handler *copyHandler) (string, error) {
+  ret := ""
+	for {
+		buffer, err := reader.ReadMultiBuffer()
+		if !buffer.IsEmpty() {
+			for _, handler := range handler.onData {
+        ret += buffer.String()
+				handler(buffer)
+			}
+
+			if werr := writer.WriteMultiBuffer(buffer); werr != nil {
+				return "", writeError{werr}
+			}
+		}
+
+		if err != nil {
+			return "", readError{err}
+		}
+	}
+  return ret, nil
+}
+
 // Copy dumps all payload from reader to writer or stops when an error occurs. It returns nil when EOF.
 func Copy(reader Reader, writer Writer, options ...CopyOption) error {
 	var handler copyHandler
@@ -106,6 +128,18 @@ func Copy(reader Reader, writer Writer, options ...CopyOption) error {
 		return err
 	}
 	return nil
+}
+
+func CopyReturn(reader Reader, writer Writer, options ...CopyOption) (string, error) {
+	var handler copyHandler
+	for _, option := range options {
+		option(&handler)
+	}
+	buffer, err := copyReturnInternal(reader, writer, &handler)
+	if err != nil && errors.Cause(err) != io.EOF {
+		return "", err
+	}
+	return buffer, nil
 }
 
 var ErrNotTimeoutReader = newError("not a TimeoutReader")
