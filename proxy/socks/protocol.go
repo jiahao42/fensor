@@ -186,11 +186,11 @@ func (s *ServerSession) handshake5(nMethod byte, reader io.Reader, writer io.Wri
 	}
 	request.Address = addr
 	request.Port = port
-	newDebugMsg("Socks request addr: " + addr.String() + port.String())
+	//newDebugMsg("SOCKS request addr: " + addr.String() + port.String())
 
 	responseAddress := net.AnyIP
 	responsePort := net.Port(1717)
-	newDebugMsg("Socket reponse addr: " + responseAddress.String() + responsePort.String())
+	//newDebugMsg("SOCKS reponse addr: " + responseAddress.String() + responsePort.String())
 	if request.Command == protocol.RequestCommandUDP {
 		addr := s.config.Address.AsAddress()
 		if addr == nil {

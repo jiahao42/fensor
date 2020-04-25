@@ -136,8 +136,11 @@ func handleHybridConfig() ([]*core.Config, error) {
 	if err != nil {
 		return nil, newError("failed to read config files: [", configFiles.String(), "]").Base(err)
 	}
+  //pinstance, _ := config.Inbound[0].ProxySettings.GetInstance()
+  //rinstance, _ := config.Inbound[0].ReceiverSettings.GetInstance()
+  //newDebugMsg("Main: Config: ProxySettings " + StructString(pinstance))
+  //newDebugMsg("Main: Config: ReceiverSettings " + StructString(rinstance))
 
-  //newDebugMsg("Config: " + StructString(config))
 	ret := make([]*core.Config, 0, 3)
 	if len(config.Inbound) == 3 { // hybrid
 		_config1 := *config

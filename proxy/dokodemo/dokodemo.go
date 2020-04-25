@@ -51,8 +51,8 @@ func (d *DokodemoDoor) Init(config *Config, pm policy.Manager) error {
   d.relayport = net.Port(config.RelayPort)
 	d.policyManager = pm
 
-  newDebugMsg("DokodemoDoor: " + StructString(d.address))
-  newDebugMsg("DokodemoDoor: " + StructString(config.Port))
+  newDebugMsg("DokodemoDoor: " + StructString(d.port))
+  newDebugMsg("DokodemoDoor: Port " + StructString(config.Port) + ", " + StructString(config.RelayPort))
 
 	return nil
 }

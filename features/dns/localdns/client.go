@@ -24,7 +24,7 @@ func (*Client) Close() error { return nil }
 
 // LookupIP implements Client.
 func (*Client) LookupIP(host string) ([]net.IP, error) {
-	//newDebugMsg("LookupIP: " + host)
+	newDebugMsg("feature: resolving IP for: " + host)
 	ips, err := net.LookupIP(host)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (*Client) LookupIP(host string) ([]net.IP, error) {
 
 // LookupIPv4 implements IPv4Lookup.
 func (c *Client) LookupIPv4(host string) ([]net.IP, error) {
-	//newDebugMsg("LookupIPv4: " + host)
+	newDebugMsg("feature: resolving IPv4 for: " + host)
 	ips, err := c.LookupIP(host)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (c *Client) LookupIPv4(host string) ([]net.IP, error) {
 
 // LookupIPv6 implements IPv6Lookup.
 func (c *Client) LookupIPv6(host string) ([]net.IP, error) {
-	//newDebugMsg("LookupIPv6: " + host)
+	newDebugMsg("feature: resolving IPv6 for: " + host)
 	ips, err := c.LookupIP(host)
 	if err != nil {
 		return nil, err

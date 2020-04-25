@@ -28,6 +28,7 @@ import (
 type Server struct {
 	config        *ServerConfig
 	policyManager policy.Manager
+  //controller    bool
 }
 
 // NewServer creates a new Server object.
@@ -37,6 +38,8 @@ func NewServer(ctx context.Context, config *ServerConfig) (*Server, error) {
 		config:        config,
 		policyManager: v.GetFeature(policy.ManagerType()).(policy.Manager),
 	}
+  //newDebugMsg("SOCKS config: " + StructString(config))
+  newDebugMsg("Context: " + StructString(ctx))
 	return s, nil
 }
 
@@ -89,12 +92,15 @@ func (s *Server) processTCP(ctx context.Context, conn internet.Connection, dispa
 	if inbound == nil || !inbound.Gateway.IsValid() {
 		return newError("inbound gateway not specified")
 	}
-
+  newDebugMsg("SOCKS: server inbound source " + StructString(inbound.Source))
+  newDebugMsg("SOCKS: server inbound gateway " + StructString(inbound.Gateway))
 	svrSession := &ServerSession{
 		config: s.config,
 		port:   inbound.Gateway.Port,
 	}
-	newDebugMsg("SOCKS server port: " + svrSession.port.String())
+  //newDebugMsg(s.config.Address.String())
+  newDebugMsg("SOCKS: config " + StructString(s.config))
+  newDebugMsg("SOCKS server port: " + svrSession.port.String())
 
 	reader := &buf.BufferedReader{Reader: buf.NewReader(conn)}
 	request, err := svrSession.Handshake(reader, conn)
@@ -120,6 +126,7 @@ func (s *Server) processTCP(ctx context.Context, conn internet.Connection, dispa
 	if request.Command == protocol.RequestCommandTCP {
 		dest := request.Destination()
 		newError("TCP Connect request to ", dest).WriteToLog(session.ExportIDToError(ctx))
+    newDebugMsg("SOCKS: server dest " + StructString(dest))
 		if inbound != nil && inbound.Source.IsValid() {
 			ctx = log.ContextWithAccessMessage(ctx, &log.AccessMessage{
 				From:   inbound.Source,
@@ -232,6 +239,7 @@ func (s *Server) handleUDPPayload(ctx context.Context, conn internet.Connection,
 			}
 
 			newError("send packet to ", request.Destination(), " with ", payload.Len(), " bytes").AtDebug().WriteToLog(session.ExportIDToError(ctx))
+      newDebugMsg("SOCKS: UDP dest " + StructString(request.Destination))
 			if inbound := session.InboundFromContext(ctx); inbound != nil && inbound.Source.IsValid() {
 				ctx = log.ContextWithAccessMessage(ctx, &log.AccessMessage{
 					From:   inbound.Source,

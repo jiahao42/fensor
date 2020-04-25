@@ -114,7 +114,7 @@ func AddInboundHandler(server *Instance, config *InboundHandlerConfig) error {
 
 func addInboundHandlers(server *Instance, configs []*InboundHandlerConfig) error {
 	for _, inboundConfig := range configs {
-		newDebugMsg("Inbound config: " + StructString(inboundConfig))
+		//newDebugMsg("Inbound config: " + StructString(inboundConfig))
 		if err := AddInboundHandler(server, inboundConfig); err != nil {
 			return err
 		}

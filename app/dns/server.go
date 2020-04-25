@@ -251,6 +251,7 @@ func (s *Server) queryIPTimeout(idx uint32, client Client, domain string, option
 
 // LookupIP implements dns.Client.
 func (s *Server) LookupIP(domain string) ([]net.IP, error) {
+	newDebugMsg("app: querying IP for " + domain)
 	return s.lookupIPInternal(domain, IPOption{
 		IPv4Enable: true,
 		IPv6Enable: true,
@@ -259,6 +260,7 @@ func (s *Server) LookupIP(domain string) ([]net.IP, error) {
 
 // LookupIPv4 implements dns.IPv4Lookup.
 func (s *Server) LookupIPv4(domain string) ([]net.IP, error) {
+	newDebugMsg("app: querying IPv4 for " + domain)
 	return s.lookupIPInternal(domain, IPOption{
 		IPv4Enable: true,
 		IPv6Enable: false,
@@ -267,6 +269,7 @@ func (s *Server) LookupIPv4(domain string) ([]net.IP, error) {
 
 // LookupIPv6 implements dns.IPv6Lookup.
 func (s *Server) LookupIPv6(domain string) ([]net.IP, error) {
+	newDebugMsg("app: querying IPv6 for " + domain)
 	return s.lookupIPInternal(domain, IPOption{
 		IPv4Enable: false,
 		IPv6Enable: true,
