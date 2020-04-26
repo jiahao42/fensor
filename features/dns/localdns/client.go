@@ -36,17 +36,19 @@ var globalDNSServers = []string{
 func (*Client) GlobalLookupIP (host string) ([]net.IP) {
   ret := []net.IP{}
   for _, server := range globalDNSServers {
-    //newDebugMsg("feature: resolving IP for " + host + ", using " + server)
+    newDebugMsg("feature: resolving IP for " + host + ", using " + server)
     c := mdns.Client{}
     m := mdns.Msg{}
     m.SetQuestion(host + ".", mdns.TypeA)
     r, _, _ := c.Exchange(&m, server+":53")
+    if r == nil { return ret }
     for _, ans := range r.Answer {
       //newDebugMsg("Feature: ans " + StructString(ans))
       //newDebugMsg("Feature: A " + fmt.Sprintf("%T", ans))
       switch t := ans.(type) {
         case *mdns.A:
           Arecord := ans.(*mdns.A)
+          newDebugMsg("feature: got record " + Arecord.String() + " from " + server)
           ret = append(ret, Arecord.A)
         default:
           newDebugMsg("Feature: DNS type " + t.String())
