@@ -39,7 +39,7 @@ func NewServer(ctx context.Context, config *ServerConfig) (*Server, error) {
 		policyManager: v.GetFeature(policy.ManagerType()).(policy.Manager),
 	}
   //newDebugMsg("SOCKS config: " + StructString(config))
-  newDebugMsg("Context: " + StructString(ctx))
+  //newDebugMsg("Context: " + StructString(ctx))
 	return s, nil
 }
 

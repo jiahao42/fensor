@@ -14,7 +14,7 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
-  "regexp"
+  //"regexp"
 
 	"v2ray.com/core"
   //"v2ray.com/core/common/serial"
@@ -210,33 +210,28 @@ func main() {
     panic("Load config failed")
   }
 
-	server1 := startV2RayWrapper(configs[0])
-  //newDebugMsg("Main: " + StructString(configs[0].Inbound[0].ReceiverSettings))
-  //msg := configs[0].Inbound[0].ReceiverSettings
-  //instance := msg.GetValue()
-  //instancexx, _ := msg.GetInstance()
-  //newDebugMsg("fuck " + instancexx.String())
-  //newDebugMsg("fuck " + StructString(msg))
-  //newDebugMsg("fuck " + StructString(instance))
-	//fmt.Println("server1 started")
+  if len(configs) == 1 {
+    server := startV2RayWrapper(configs[0])
+    defer server.Close()
+  } else if len(configs) == 3 {
 
-	if len(configs) == 3 {
-    re := regexp.MustCompile(`From:([0-9]+)`)
-    config1, _ := configs[0].Inbound[0].ReceiverSettings.GetInstance()
-    port1 := string(re.FindSubmatch([]byte(config1.String()))[1])
-    config2, _ := configs[1].Inbound[0].ReceiverSettings.GetInstance()
-    port2 := string(re.FindSubmatch([]byte(config2.String()))[1])
-    config3, _ := configs[2].Inbound[0].ReceiverSettings.GetInstance()
-    port3 := string(re.FindSubmatch([]byte(config3.String()))[1])
-    newDebugMsg("Main: port " + port1 + ", " + port2 + ", " + port3)
-    runSOCKS5Server("localhost:" + port3)
+    controlServer := startV2RayWrapper(configs[0])
+    freeServer := startV2RayWrapper(configs[1])
+    relayServer := startV2RayWrapper(configs[2])
+    //re := regexp.MustCompile(`From:([0-9]+)`)
+    //config1, _ := configs[0].Inbound[0].ReceiverSettings.GetInstance()
+    //port1 := string(re.FindSubmatch([]byte(config1.String()))[1])
+    //config2, _ := configs[1].Inbound[0].ReceiverSettings.GetInstance()
+    //port2 := string(re.FindSubmatch([]byte(config2.String()))[1])
+    //config3, _ := configs[2].Inbound[0].ReceiverSettings.GetInstance()
+    //port3 := string(re.FindSubmatch([]byte(config3.String()))[1])
+    //newDebugMsg("Main: port " + port1 + ", " + port2 + ", " + port3)
 
-		server2 := startV2RayWrapper(configs[1])
-		fmt.Println("server2 started")
-		defer server2.Close()
-	}
-	defer server1.Close()
-  //controller_config := configs[2]
+    defer controlServer.Close()
+    defer freeServer.Close()
+    defer relayServer.Close()
+
+  }
 
 	// Explicitly triggering GC to remove garbage from config loading.
 	runtime.GC()
