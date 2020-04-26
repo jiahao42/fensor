@@ -1,6 +1,8 @@
 package localdns
 
 import (
+  //"fmt"
+
 	"v2ray.com/core/common/net"
 	"v2ray.com/core/features/dns"
   mdns "github.com/miekg/dns"
@@ -40,8 +42,16 @@ func (*Client) GlobalLookupIP (host string) ([]net.IP) {
     m.SetQuestion(host + ".", mdns.TypeA)
     r, _, _ := c.Exchange(&m, server+":53")
     for _, ans := range r.Answer {
-        Arecord := ans.(*mdns.A)
-        ret = append(ret, Arecord.A)
+      //newDebugMsg("Feature: ans " + StructString(ans))
+      //newDebugMsg("Feature: A " + fmt.Sprintf("%T", ans))
+      switch t := ans.(type) {
+        case *mdns.A:
+          Arecord := ans.(*mdns.A)
+          ret = append(ret, Arecord.A)
+        default:
+          newDebugMsg("Feature: DNS type " + t.String())
+      }
+      //ret = append(ret, Arecord.A)
     }
   }
   return ret
