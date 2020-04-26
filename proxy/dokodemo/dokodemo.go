@@ -41,6 +41,8 @@ type DokodemoDoor struct {
   relayport     net.Port
   pool          *db.Pool
   useRelay      bool
+  relayInitStep int
+  targetAddr    string
 }
 
 // Init initializes the DokodemoDoor instance with necessary parameters.
@@ -50,12 +52,14 @@ func (d *DokodemoDoor) Init(config *Config, pm policy.Manager) error {
 	}
 	d.config = config
 	d.address = config.GetPredefinedAddress()
+  //newDebugMsg("Predefined address " + d.address.String())
 	d.port = net.Port(config.Port)
   d.relayport = net.Port(config.RelayPort)
 	d.policyManager = pm
   d.pool = db.New()
   d.pool.Start("tcp", "localhost", "6379")
   d.useRelay = false
+  d.relayInitStep = 1
 
   //newDebugMsg("DokodemoDoor: " + StructString(d.port))
   newDebugMsg("DokodemoDoor: Port " + StructString(config.Port) + ", " + StructString(config.RelayPort))
@@ -150,21 +154,30 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		} else {
 			reader = buf.NewReader(conn)
 		}
-    //mb, _ := reader.ReadMultiBuffer()
-    //newDebugMsg("DokodemoDoor: read " + mb.String())
-    //link.Writer.WriteMultiBuffer(mb)
-    //newDebugMsg("Dokodemo: request")
-    buffer, err := buf.SmartCopy(reader, link.Writer, d.pool, buf.UpdateActivity(timer))
-    if err != nil {
-      return newError("failed to transport request").Base(err)
-    }
-    if buffer == "USE_RELAY" {
-      err = buf.Copy(reader, relayLink.Writer, buf.UpdateActivity(timer))
-      if err != nil {
-        return newError("failed to transport request").Base(err)
+    if !d.useRelay {
+      d.targetAddr, err = buf.SmartCopy(reader, link.Writer, d.pool, buf.UpdateActivity(timer))
+      //newDebugMsg("Dokodemo: SmartCopy return buffer " + d.targetAddr)
+      if err != nil && err.Error() == "USE_RELAY" {
+        d.useRelay = true
       }
     }
+    if d.useRelay {
+      if d.relayInitStep == 1 {
+        // Should have a func to create SOCKS conn, and send the unfinished request
+        _, err = buf.RelayCopy(reader, relayLink.Writer, d.relayInitStep, d.targetAddr, buf.UpdateActivity(timer))
+        if err != nil {
+          return newError("failed to transport request").Base(err)
+        }
+        d.relayInitStep++
+      } else if d.relayInitStep == 3 {
+        buf.RelayCopy(reader, relayLink.Writer, d.relayInitStep, d.targetAddr, buf.UpdateActivity(timer))
+        d.relayInitStep++
+      } else {
+        // operate as normal
+        err = buf.Copy(reader, link.Writer, buf.UpdateActivity(timer))
+      }
 
+    }
 		return nil
 	}
 
@@ -213,14 +226,30 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 
 	responseDone := func() error {
 		defer timer.SetTimeout(plcy.Timeouts.UplinkOnly)
+    newDebugMsg("Dokodemo: responseDone started")
 
     // Write to the forwarded address
-    buffer, err := buf.SmartCopy(link.Reader, writer, d.pool, buf.UpdateActivity(timer))
-		if err != nil {
-			return newError("failed to transport response").Base(err)
-		}
-    if buffer == "USE_RELAY" {
-      err = buf.Copy(relayLink.Reader, writer, buf.UpdateActivity(timer))
+    //buffer, err := buf.SmartCopy(link.Reader, writer, d.pool, buf.UpdateActivity(timer))
+    // TODO: through the response, we may able to distinguish the blank pages
+    if !d.useRelay {
+      // commuicate as normal
+      err = buf.Copy(link.Reader, writer, buf.UpdateActivity(timer))
+    }
+    if d.useRelay {
+      if d.relayInitStep == 2 {
+        buf, err := buf.RelayCopy(link.Reader, writer, d.relayInitStep, d.targetAddr, buf.UpdateActivity(timer))
+        if err != nil {
+          return newError("failed to transport request").Base(err)
+        }
+        newDebugMsg("Dokodemo: responseDone step 2 buf " + buf)
+        if buf == "\x05\x00" {
+          newDebugMsg("Dokodemo: responseDone goto step 3")
+          d.relayInitStep++
+        }
+      } else if d.relayInitStep == 4 {
+        // operate as normal
+        err = buf.Copy(link.Reader, writer, buf.UpdateActivity(timer))
+      }
     }
 		return nil
 	}
@@ -228,6 +257,8 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 	if err := task.Run(ctx, task.OnSuccess(requestDone, task.Close(link.Writer)), responseDone, tproxyRequest); err != nil {
 		common.Interrupt(link.Reader)
 		common.Interrupt(link.Writer)
+    common.Interrupt(relayLink.Reader)
+    common.Interrupt(relayLink.Writer)
 		return newError("connection ends").Base(err)
 	}
 
