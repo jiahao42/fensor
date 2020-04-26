@@ -6,6 +6,26 @@
   },
   "inbounds": [
     {
+      "port": 1080,
+      "listen": "0.0.0.0",
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 1081,
+        "relayport": 1082,
+        "network": "tcp,udp",
+        "followRedirect": false
+      },
+      "tag": "",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+    {
       "port": 1081,
       "protocol": "socks",
       "sniffing": {
@@ -32,13 +52,12 @@
       "setting": {
         "auth": "noauth"
       }
-    },
-    {
-      "port": 1080,
-      "protocol": "socks"
     }
   ],
   "outbounds": [
+    {
+      "protocol": "freedom"
+    },
     {
       "protocol": "freedom"
     },
@@ -58,9 +77,6 @@
           }
         ]
       }
-    },
-    {
-      "protocol": "freedom"
     }
   ]
 }
