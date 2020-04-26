@@ -40,6 +40,7 @@ type DokodemoDoor struct {
 	port          net.Port
   relayport     net.Port
   pool          *db.Pool
+  useRelay      bool
 }
 
 // Init initializes the DokodemoDoor instance with necessary parameters.
@@ -54,6 +55,7 @@ func (d *DokodemoDoor) Init(config *Config, pm policy.Manager) error {
 	d.policyManager = pm
   d.pool = db.New()
   d.pool.Start("tcp", "localhost", "6379")
+  d.useRelay = false
 
   //newDebugMsg("DokodemoDoor: " + StructString(d.port))
   newDebugMsg("DokodemoDoor: Port " + StructString(config.Port) + ", " + StructString(config.RelayPort))
@@ -96,7 +98,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		Address: d.address,
 		Port:    d.relayport,
 	}
-  newDebugMsg("Dokodemo: dest0 " + StructString(dest))
+  //newDebugMsg("Dokodemo: dest0 " + StructString(dest))
 
 	destinationOverridden := false
 	if d.config.FollowRedirect {
@@ -151,10 +153,16 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
     //mb, _ := reader.ReadMultiBuffer()
     //newDebugMsg("DokodemoDoor: read " + mb.String())
     //link.Writer.WriteMultiBuffer(mb)
-    newDebugMsg("Dokodemo: request")
-    _, err := buf.SmartCopy(reader, link.Writer, d.pool, buf.UpdateActivity(timer))
+    //newDebugMsg("Dokodemo: request")
+    buffer, err := buf.SmartCopy(reader, link.Writer, d.pool, buf.UpdateActivity(timer))
     if err != nil {
       return newError("failed to transport request").Base(err)
+    }
+    if buffer == "USE_RELAY" {
+      err = buf.Copy(reader, relayLink.Writer, buf.UpdateActivity(timer))
+      if err != nil {
+        return newError("failed to transport request").Base(err)
+      }
     }
 
 		return nil
@@ -207,10 +215,13 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		defer timer.SetTimeout(plcy.Timeouts.UplinkOnly)
 
     // Write to the forwarded address
-    _, err := buf.SmartCopy(link.Reader, writer, d.pool, buf.UpdateActivity(timer))
+    buffer, err := buf.SmartCopy(link.Reader, writer, d.pool, buf.UpdateActivity(timer))
 		if err != nil {
 			return newError("failed to transport response").Base(err)
 		}
+    if buffer == "USE_RELAY" {
+      err = buf.Copy(relayLink.Reader, writer, buf.UpdateActivity(timer))
+    }
 		return nil
 	}
 

@@ -12,6 +12,7 @@ import (
 	"v2ray.com/core/common/errors"
 	"v2ray.com/core/common/signal"
   "v2ray.com/core/common/db"
+  "v2ray.com/core/common/db/model"
 )
 
 type dataHandler func(MultiBuffer)
@@ -141,6 +142,11 @@ func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *cop
               newDebugMsg("Buf: domain not found " + domain)
             } else {
               newDebugMsg("Buf: domain found " + StructString(status))
+              if status.Status == model.DNS_BLOCKED {
+                return "USE_RELAY", nil
+              } else {
+                // do nothing, leave it to the freedom protocol
+              }
             }
             //urlAddr := url.URL{}
             //urlAddr.UnmarshalBinary([]byte(str[4:8]))
