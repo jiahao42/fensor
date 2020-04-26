@@ -1,10 +1,10 @@
 package db_test
 
 import (
+	"fmt"
+	"testing"
 	"v2ray.com/core/common/db"
 	"v2ray.com/core/common/db/model"
-	"testing"
-	"fmt"
 )
 
 func TestDBConnection(t *testing.T) {
@@ -17,9 +17,8 @@ func TestDBConnection(t *testing.T) {
 		t.Error(err)
 	} else {
 		status2, _ := pool.LookupRecord("example.com")
-		if (*status1 != *status2) {
+		if *status1 != *status2 {
 			t.Error("DB record doesn't match", status1, status2)
 		}
 	}
 }
-

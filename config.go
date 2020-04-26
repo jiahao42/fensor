@@ -38,7 +38,7 @@ func RegisterConfigLoader(format *ConfigFormat) error {
 
 	for _, ext := range format.Extension {
 		lext := strings.ToLower(ext)
-    //newDebugMsg("Core: registering " + StructString(format))
+		//newDebugMsg("Core: registering " + StructString(format))
 		if f, found := configLoaderByExt[lext]; found {
 			return newError(ext, " already registered to ", f.Name)
 		}
@@ -79,15 +79,15 @@ func loadProtobufConfig(data []byte) (*Config, error) {
 	config := new(Config)
 	if err := proto.Unmarshal(data, config); err != nil {
 		return nil, err
-  }
-  //instance, _ := config.Inbound[0].ProxySettings.GetInstance()
-  //newDebugMsg("Core: loadconfig " + StructString(instance))
-  //newDebugMsg("Core: loadconfig " + StructString(config))
+	}
+	//instance, _ := config.Inbound[0].ProxySettings.GetInstance()
+	//newDebugMsg("Core: loadconfig " + StructString(instance))
+	//newDebugMsg("Core: loadconfig " + StructString(config))
 	return config, nil
 }
 
 func init() {
-  //newDebugMsg("Core: INIT!")
+	//newDebugMsg("Core: INIT!")
 	common.Must(RegisterConfigLoader(&ConfigFormat{
 		Name:      "Protobuf",
 		Extension: []string{"pb"},
@@ -96,13 +96,13 @@ func init() {
 			case cmdarg.Arg:
 				r, err := confloader.LoadConfig(v[0])
 				common.Must(err)
-        //newDebugMsg("Core: init " + StructString(r))
+				//newDebugMsg("Core: init " + StructString(r))
 				data, err := buf.ReadAllToBytes(r)
 				common.Must(err)
 				return loadProtobufConfig(data)
 			case io.Reader:
 				data, err := buf.ReadAllToBytes(v)
-        //newDebugMsg("Core: init ioreader " + StructString(data))
+				//newDebugMsg("Core: init ioreader " + StructString(data))
 				common.Must(err)
 				return loadProtobufConfig(data)
 			default:

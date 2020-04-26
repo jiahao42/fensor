@@ -135,9 +135,9 @@ func (c *InboundDetourAllocationConfig) Build() (*proxyman.AllocationStrategy, e
 }
 
 type InboundDetourConfig struct {
-	Protocol       string                         `json:"protocol"`
-	PortRange      *PortRange                     `json:"port"`
-  //RelayPortRange *PortRange                     `json:"relayport"`
+	Protocol  string     `json:"protocol"`
+	PortRange *PortRange `json:"port"`
+	//RelayPortRange *PortRange                     `json:"relayport"`
 	ListenOn       *Address                       `json:"listen"`
 	Settings       *json.RawMessage               `json:"settings"`
 	Tag            string                         `json:"tag"`
@@ -156,7 +156,7 @@ func (c *InboundDetourConfig) Build() (*core.InboundHandlerConfig, error) {
 	}
 	receiverSettings.PortRange = c.PortRange.Build()
 
-  //newDebugMsg("Infra Conf: " + StructString(c))
+	//newDebugMsg("Infra Conf: " + StructString(c))
 
 	if c.ListenOn != nil {
 		if c.ListenOn.Family().IsDomain() {
@@ -217,12 +217,12 @@ func (c *InboundDetourConfig) Build() (*core.InboundHandlerConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-  //newDebugMsg("Infra Conf: " + ts.Port)
-  //newDebugMsg("Infra Conf: ProxyConfig " + StructString(ts) + " " + reflect.TypeOf(ts).String())
-  //msg := serial.ToTypedMessage(ts)
-  //newDebugMsg("Infra Conf: ProxyConfig " + StructString(msg))
-  //ins, _ := msg.GetInstance()
-  //newDebugMsg("Infra Conf: ProxyConfig " + StructString(ins))
+	//newDebugMsg("Infra Conf: " + ts.Port)
+	//newDebugMsg("Infra Conf: ProxyConfig " + StructString(ts) + " " + reflect.TypeOf(ts).String())
+	//msg := serial.ToTypedMessage(ts)
+	//newDebugMsg("Infra Conf: ProxyConfig " + StructString(msg))
+	//ins, _ := msg.GetInstance()
+	//newDebugMsg("Infra Conf: ProxyConfig " + StructString(ins))
 
 	return &core.InboundHandlerConfig{
 		Tag:              c.Tag,

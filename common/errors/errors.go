@@ -2,10 +2,10 @@
 package errors // import "v2ray.com/core/common/errors"
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
-	"fmt"
 
 	"v2ray.com/core/common/log"
 	"v2ray.com/core/common/serial"
@@ -142,8 +142,6 @@ func (err *Error) WriteToLog(opts ...ExportOption) {
 		Content:  err,
 	})
 }
-
-
 
 // WriteToConsole writes current error into console/terminal
 func (err *Error) WriteToConsole(opts ...ExportOption) {

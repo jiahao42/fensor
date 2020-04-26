@@ -208,10 +208,10 @@ func New(config *Config) (*Instance, error) {
 	}
 
 	//config.Inbound = config.Inbound[:1]
-	//config.Outbound = config.Outbound[:1] 
+	//config.Outbound = config.Outbound[:1]
 	//newconf := serial.ToTypedMessage(&proxyman.ReceiverConfig{
-		//PortRange: net.SinglePortRange(54321),
-		//Listen: net.NewIPOrDomain(net.LocalHostIP),
+	//PortRange: net.SinglePortRange(54321),
+	//Listen: net.NewIPOrDomain(net.LocalHostIP),
 	//})
 	//config.Inbound[0].ReceiverSettings = newconf
 	//my_conf := config.Inbound[0].ReceiverSettings

@@ -54,7 +54,7 @@ func (c *Client) Process(ctx context.Context, link *transport.Link, dialer inter
 		return newError("target not specified.")
 	}
 	destination := outbound.Target
-  newDebugMsg("SOCKS: client destination " + StructString(destination))
+	newDebugMsg("SOCKS: client destination " + StructString(destination))
 
 	var server *protocol.ServerSpec
 	var conn internet.Connection

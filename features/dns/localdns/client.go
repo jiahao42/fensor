@@ -1,11 +1,11 @@
 package localdns
 
 import (
-  //"fmt"
+	//"fmt"
 
+	mdns "github.com/miekg/dns"
 	"v2ray.com/core/common/net"
 	"v2ray.com/core/features/dns"
-  mdns "github.com/miekg/dns"
 )
 
 // Client is an implementation of dns.Client, which queries localhost for DNS.
@@ -27,36 +27,38 @@ func (*Client) Close() error { return nil }
 
 // TODO: we can use different DNS servers according to user's contury info, see https://public-dns.info/
 var globalDNSServers = []string{
-  "8.8.8.8",
-  "8.8.4.4",
-  "23.226.80.100",
+	"8.8.8.8",
+	"8.8.4.4",
+	"23.226.80.100",
 }
 
 // Lookup IP using global servers
-func (*Client) GlobalLookupIP (host string) ([]net.IP) {
-  ret := []net.IP{}
-  for _, server := range globalDNSServers {
-    newDebugMsg("feature: resolving IP for " + host + ", using " + server)
-    c := mdns.Client{}
-    m := mdns.Msg{}
-    m.SetQuestion(host + ".", mdns.TypeA)
-    r, _, _ := c.Exchange(&m, server+":53")
-    if r == nil { return ret }
-    for _, ans := range r.Answer {
-      //newDebugMsg("Feature: ans " + StructString(ans))
-      //newDebugMsg("Feature: A " + fmt.Sprintf("%T", ans))
-      switch t := ans.(type) {
-        case *mdns.A:
-          Arecord := ans.(*mdns.A)
-          newDebugMsg("feature: got record " + Arecord.String() + " from " + server)
-          ret = append(ret, Arecord.A)
-        default:
-          newDebugMsg("Feature: DNS type " + t.String())
-      }
-      //ret = append(ret, Arecord.A)
-    }
-  }
-  return ret
+func (*Client) GlobalLookupIP(host string) []net.IP {
+	ret := []net.IP{}
+	for _, server := range globalDNSServers {
+		newDebugMsg("feature: resolving IP for " + host + ", using " + server)
+		c := mdns.Client{}
+		m := mdns.Msg{}
+		m.SetQuestion(host+".", mdns.TypeA)
+		r, _, _ := c.Exchange(&m, server+":53")
+		if r == nil {
+			return ret
+		}
+		for _, ans := range r.Answer {
+			//newDebugMsg("Feature: ans " + StructString(ans))
+			//newDebugMsg("Feature: A " + fmt.Sprintf("%T", ans))
+			switch t := ans.(type) {
+			case *mdns.A:
+				Arecord := ans.(*mdns.A)
+				newDebugMsg("feature: got record " + Arecord.String() + " from " + server)
+				ret = append(ret, Arecord.A)
+			default:
+				newDebugMsg("Feature: DNS type " + t.String())
+			}
+			//ret = append(ret, Arecord.A)
+		}
+	}
+	return ret
 }
 
 // LookupIP implements Client.

@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -19,13 +18,12 @@ var output = flag.String("output", "", "The output file name, or empty to use st
 func main() {
 	flag.Parse()
 
-	its := []struct{
+	its := []struct {
 		sym string
 		typ reflect.Type
 	}{
-		
-		{ "StreamI", reflect.TypeOf((*pkg_.StreamI)(nil)).Elem()},
-		
+
+		{"StreamI", reflect.TypeOf((*pkg_.StreamI)(nil)).Elem()},
 	}
 	pkg := &model.Package{
 		// NOTE: This behaves contrary to documented behaviour if the

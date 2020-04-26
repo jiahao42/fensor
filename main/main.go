@@ -14,14 +14,14 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
-  //"regexp"
+	//"regexp"
 
 	"v2ray.com/core"
-  //"v2ray.com/core/common/serial"
+	//"v2ray.com/core/common/serial"
+	socks5 "github.com/armon/go-socks5"
 	"v2ray.com/core/common/cmdarg"
 	"v2ray.com/core/common/platform"
 	_ "v2ray.com/core/main/distro/all"
-  socks5 "github.com/armon/go-socks5"
 )
 
 var (
@@ -32,7 +32,7 @@ var (
 	format      = flag.String("format", "json", "Format of input file.")
 
 	/*  We have to do this here because Golang's Test will also need to parse flag, before
-		main func in this file is run.
+	main func in this file is run.
 	*/
 	_ = func() error {
 
@@ -136,10 +136,10 @@ func handleHybridConfig() ([]*core.Config, error) {
 	if err != nil {
 		return nil, newError("failed to read config files: [", configFiles.String(), "]").Base(err)
 	}
-  //pinstance, _ := config.Inbound[0].ProxySettings.GetInstance()
-  //rinstance, _ := config.Inbound[0].ReceiverSettings.GetInstance()
-  //newDebugMsg("Main: Config: ProxySettings " + StructString(pinstance))
-  //newDebugMsg("Main: Config: ReceiverSettings " + StructString(rinstance))
+	//pinstance, _ := config.Inbound[0].ProxySettings.GetInstance()
+	//rinstance, _ := config.Inbound[0].ReceiverSettings.GetInstance()
+	//newDebugMsg("Main: Config: ProxySettings " + StructString(pinstance))
+	//newDebugMsg("Main: Config: ReceiverSettings " + StructString(rinstance))
 
 	ret := make([]*core.Config, 0, 3)
 	if len(config.Inbound) == 3 { // hybrid
@@ -151,20 +151,20 @@ func handleHybridConfig() ([]*core.Config, error) {
 		config2 := &_config2
 		config2.Inbound = config.Inbound[1:2]
 		config2.Outbound = config.Outbound[1:2]
-    _config3 := *config
-    config3 := &_config3
-    config3.Inbound = config.Inbound[2:3]
-    config3.Outbound = config.Outbound[2:3]
+		_config3 := *config
+		config3 := &_config3
+		config3.Inbound = config.Inbound[2:3]
+		config3.Outbound = config.Outbound[2:3]
 		ret = append(ret, config1)
 		ret = append(ret, config2)
-    ret = append(ret, config3)
+		ret = append(ret, config3)
 	} else { // v2ray default
 		ret = append(ret, config)
 	}
 	return ret, nil
 }
 
-func startV2RayWrapper(config *core.Config) (core.Server) {
+func startV2RayWrapper(config *core.Config) core.Server {
 	server, err := startV2Ray(config)
 	if err != nil {
 		fmt.Println(err)
@@ -185,15 +185,15 @@ func startV2RayWrapper(config *core.Config) (core.Server) {
 }
 
 func runSOCKS5Server(addr string) {
-  conf := &socks5.Config{}
-  server, err := socks5.New(conf)
-  if err != nil {
-    panic(err)
-  }
+	conf := &socks5.Config{}
+	server, err := socks5.New(conf)
+	if err != nil {
+		panic(err)
+	}
 
-  if err := server.ListenAndServe("tcp", addr); err != nil {
-    panic(err)
-  }
+	if err := server.ListenAndServe("tcp", addr); err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -206,32 +206,32 @@ func main() {
 		return
 	}
 	configs, err := handleHybridConfig()
-  if err != nil {
-    panic("Load config failed")
-  }
+	if err != nil {
+		panic("Load config failed")
+	}
 
-  if len(configs) == 1 {
-    server := startV2RayWrapper(configs[0])
-    defer server.Close()
-  } else if len(configs) == 3 {
+	if len(configs) == 1 {
+		server := startV2RayWrapper(configs[0])
+		defer server.Close()
+	} else if len(configs) == 3 {
 
-    controlServer := startV2RayWrapper(configs[0])
-    freeServer := startV2RayWrapper(configs[1])
-    relayServer := startV2RayWrapper(configs[2])
-    //re := regexp.MustCompile(`From:([0-9]+)`)
-    //config1, _ := configs[0].Inbound[0].ReceiverSettings.GetInstance()
-    //port1 := string(re.FindSubmatch([]byte(config1.String()))[1])
-    //config2, _ := configs[1].Inbound[0].ReceiverSettings.GetInstance()
-    //port2 := string(re.FindSubmatch([]byte(config2.String()))[1])
-    //config3, _ := configs[2].Inbound[0].ReceiverSettings.GetInstance()
-    //port3 := string(re.FindSubmatch([]byte(config3.String()))[1])
-    //newDebugMsg("Main: port " + port1 + ", " + port2 + ", " + port3)
+		controlServer := startV2RayWrapper(configs[0])
+		freeServer := startV2RayWrapper(configs[1])
+		relayServer := startV2RayWrapper(configs[2])
+		//re := regexp.MustCompile(`From:([0-9]+)`)
+		//config1, _ := configs[0].Inbound[0].ReceiverSettings.GetInstance()
+		//port1 := string(re.FindSubmatch([]byte(config1.String()))[1])
+		//config2, _ := configs[1].Inbound[0].ReceiverSettings.GetInstance()
+		//port2 := string(re.FindSubmatch([]byte(config2.String()))[1])
+		//config3, _ := configs[2].Inbound[0].ReceiverSettings.GetInstance()
+		//port3 := string(re.FindSubmatch([]byte(config3.String()))[1])
+		//newDebugMsg("Main: port " + port1 + ", " + port2 + ", " + port3)
 
-    defer controlServer.Close()
-    defer freeServer.Close()
-    defer relayServer.Close()
+		defer controlServer.Close()
+		defer freeServer.Close()
+		defer relayServer.Close()
 
-  }
+	}
 
 	// Explicitly triggering GC to remove garbage from config loading.
 	runtime.GC()
