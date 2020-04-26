@@ -142,10 +142,11 @@ func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *cop
               newDebugMsg("Buf: domain not found " + domain)
             } else {
               newDebugMsg("Buf: domain found " + StructString(status))
-              if status.Status == model.DNS_BLOCKED {
-                return "USE_RELAY", nil
-              } else {
+              if status.Status == model.GOOD {
                 // do nothing, leave it to the freedom protocol
+              } else if status.Status == model.DNS_BLOCKED || status.Status == model.TCP_BLOCKED {
+                newDebugMsg("Buf: USE_RELAY for " + domain)
+                return "USE_RELAY", nil
               }
             }
             //urlAddr := url.URL{}
@@ -204,7 +205,6 @@ func SmartCopy(reader Reader, writer Writer, pool *db.Pool, options ...CopyOptio
 	if err != nil && errors.Cause(err) != io.EOF {
 		return buffer, err
 	}
-  //newDebugMsg("Buf: CopyReturn " + buffer)
 	return buffer, nil
 }
 

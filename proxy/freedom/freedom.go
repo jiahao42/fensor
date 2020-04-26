@@ -81,15 +81,18 @@ func (h *Handler) resolveIP(ctx context.Context, domain string, localAddr net.Ad
 
 	ips, err := lookupFunc(domain)
 	newDebugMsg("Freedom: resolving IP using predefined DNS server for: " + domain)
-	if err != nil {
+	if err != nil || len(ips) == 0{
 		newError("failed to get IP address for domain from predefined DNS server", domain).Base(err).WriteToLog(session.ExportIDToError(ctx))
 	  newDebugMsg("Freedom: resolving IP using global DNS server for: " + domain)
     ips = globalLookupFunc(domain) // Now try use global DNS server
-	}
-	if len(ips) == 0 { // Still no ip address found
-    status := &model.URLStatus{domain, model.DNS_BLOCKED}
-    h.pool.InsertRecord(status)
-		return nil
+    if len(ips) == 0 { // Still no ip address found
+      status := &model.URLStatus{domain, model.TCP_BLOCKED}
+      h.pool.InsertRecord(status)
+      return nil
+    } else { // Find IP from global DNS server
+      status := &model.URLStatus{domain, model.DNS_BLOCKED}
+      h.pool.InsertRecord(status)
+    }
 	} else {
     status := &model.URLStatus{domain, model.GOOD}
     h.pool.InsertRecord(status)
