@@ -102,7 +102,6 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		Address: d.address,
 		Port:    d.relayport,
 	}
-	//newDebugMsg("Dokodemo: dest0 " + StructString(dest))
 
 	destinationOverridden := false
 	if d.config.FollowRedirect {
@@ -227,7 +226,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 
 	responseDone := func() error {
 		defer timer.SetTimeout(plcy.Timeouts.UplinkOnly)
-		newDebugMsg("Dokodemo: responseDone started")
+		//newDebugMsg("Dokodemo: responseDone started")
 
 		// Write to the forwarded address
 		//buffer, err := buf.SmartCopy(link.Reader, writer, d.pool, buf.UpdateActivity(timer))
@@ -242,9 +241,9 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 				if err != nil {
 					return newError("failed to transport request").Base(err)
 				}
-				newDebugMsg("Dokodemo: responseDone step 2 buf " + buf)
+				//newDebugMsg("Dokodemo: responseDone step 2 buf " + buf)
 				if buf == "\x05\x00" {
-					newDebugMsg("Dokodemo: responseDone goto step 3")
+					//newDebugMsg("Dokodemo: responseDone goto step 3")
 					d.relayInitStep++
 				}
 			} else if d.relayInitStep == 4 {

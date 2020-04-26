@@ -107,7 +107,7 @@ func copyInternal(reader Reader, writer Writer, handler *copyHandler) error {
 func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *copyHandler) (string, error) {
 	//stage := 0
 	ret := ""
-	newDebugMsg("Buf: smartCopyInternal started")
+	//newDebugMsg("Buf: smartCopyInternal started")
 	for {
 		buffer, err := reader.ReadMultiBuffer()
 		// 1. read until get URL
@@ -118,7 +118,7 @@ func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *cop
 			for _, handler := range handler.onData {
 				handler(buffer)
 				str := buffer.String()
-				newDebugMsg("Buf: smartCopyInternal buffer " + str)
+				//newDebugMsg("Buf: smartCopyInternal buffer " + str)
 				ret += str
 				if len(str) > 3 && str[:3] == "\x05\x01\x00" {
 					addrType := str[3]
@@ -227,26 +227,6 @@ func relayCopyInternal(reader Reader, writer Writer, step int, addr string, hand
 		// 4. work as normal
 		err := copyInternal(reader, writer, handler)
 		return "USING CopyInternal", err
-		//for {
-		//buffer, err := reader.ReadMultiBuffer()
-		//if !buffer.IsEmpty() {
-		//for _, handler := range handler.onData {
-		//handler(buffer)
-		//str := buffer.String()
-		//ret += str
-		//}
-
-		//if werr := writer.WriteMultiBuffer(buffer); werr != nil {
-		//newDebugMsg("Buf: copyReturnInternal writeError" + err.Error())
-		//return ret, writeError{werr}
-		//}
-		//}
-
-		//if err != nil {
-		//newDebugMsg("Buf: copyReturnInternal readError " + err.Error())
-		//return ret, readError{err}
-		//}
-		//}
 	}
 	return ret, nil
 }
