@@ -4,15 +4,15 @@ import (
 	"io"
 	"time"
   "net/url"
-  //"net"
   "fmt"
   "strings"
-  //"strconv"
+  "encoding/binary"
 
 	"v2ray.com/core/common/errors"
 	"v2ray.com/core/common/signal"
   "v2ray.com/core/common/db"
   "v2ray.com/core/common/db/model"
+  //"v2ray.com/core/common/buf"
 )
 
 type dataHandler func(MultiBuffer)
@@ -133,8 +133,9 @@ func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *cop
             //newDebugMsg("Buf: raw domain " + rawDomain)
             u := &url.URL{}
             u.UnmarshalBinary([]byte(rawDomain))
+            port := binary.BigEndian.Uint16([]byte(str[5+addrLen:5+addrLen+2]))
             domain := u.String()
-            newDebugMsg("Buf: parsed domain " + domain)
+            newDebugMsg("Buf: parsed domain " + domain + ":" + StructString(port))
             status, err := pool.LookupRecord(domain)
             if err != nil {
               // status not found
@@ -142,30 +143,15 @@ func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *cop
               newDebugMsg("Buf: domain not found " + domain)
             } else {
               newDebugMsg("Buf: domain found " + StructString(status))
-              if status.Status == model.GOOD {
+              if status.Status == model.GOOD || status.Status == model.DNS_BLOCKED {
                 // do nothing, leave it to the freedom protocol
-              } else if status.Status == model.DNS_BLOCKED || status.Status == model.TCP_BLOCKED {
-                newDebugMsg("Buf: USE_RELAY for " + domain)
-                return "USE_RELAY", nil
+              } else if status.Status == model.TCP_BLOCKED {
+                //newDebugMsg("Buf: USE_RELAY for " + domain)
+                return fmt.Sprintf("%s:%d", domain, port), errors.New("USE_RELAY")
               }
             }
-            //urlAddr := url.URL{}
-            //urlAddr.UnmarshalBinary([]byte(str[4:8]))
           }
         }
-        //if stage == 0 && str == "\x05\x01\x00" {
-          //stage = 1
-          //newDebugMsg(StructString(stage) + "STAGE 1!")
-        //}
-        //if stage == 1 && str == "\x05\x00" {
-          //stage = 2
-          //newDebugMsg("STAGE 2!")
-        //} else if stage == 2 {
-          //newDebugMsg("STAGE 3!")
-        //}
-        //if str == "\x05\x00" {
-          //newDebugMsg(StructString(stage) + "SHIT!")
-        //}
 			}
 
 			if werr := writer.WriteMultiBuffer(buffer); werr != nil {
@@ -179,7 +165,58 @@ func smartCopyInternal(reader Reader, writer Writer, pool *db.Pool, handler *cop
 			return ret, readError{err}
 		}
   }
-  //newDebugMsg("Buf: copyReturnInternal " + ret)
+  return ret, nil
+}
+
+// smartCopy
+func relayCopyInternal(reader Reader, writer Writer, domain string, handler *copyHandler) (string, error) {
+  ret := ""
+  // Set up SOCKS connection manually
+  // 1. Write to proxy server
+  cmd_buf := &Buffer{}
+  cmd_buf.WriteString("\x05\x01\x00")
+  cmd := MultiBuffer{}
+  cmd = append(cmd, cmd_buf)
+  if werr := writer.WriteMultiBuffer(cmd); werr != nil {
+    newDebugMsg("Buf: relayCopyInternal writeError")
+    return ret, writeError{werr}
+  }
+  // 2. Got reply, should read \x05\x00
+  var reply MultiBuffer
+  for {
+    reply, _ := reader.ReadMultiBuffer()
+    if !reply.IsEmpty() { break }
+  }
+  for _, handler := range handler.onData {
+    handler(reply)
+    str := reply.String()
+    if str != "\x05\x00" {
+      newDebugMsg("Buf: relayCopyInternal handshake not successful")
+    }
+  }
+  // 3. Send target address
+
+  // 4. work as normal
+  for {
+		buffer, err := reader.ReadMultiBuffer()
+		if !buffer.IsEmpty() {
+			for _, handler := range handler.onData {
+				handler(buffer)
+        str := buffer.String()
+        ret += str
+			}
+
+			if werr := writer.WriteMultiBuffer(buffer); werr != nil {
+        newDebugMsg("Buf: copyReturnInternal writeError")
+				return ret, writeError{werr}
+			}
+		}
+
+		if err != nil {
+      newDebugMsg("Buf: copyReturnInternal readError")
+			return ret, readError{err}
+		}
+  }
   return ret, nil
 }
 
@@ -202,6 +239,19 @@ func SmartCopy(reader Reader, writer Writer, pool *db.Pool, options ...CopyOptio
 		option(&handler)
 	}
 	buffer, err := smartCopyInternal(reader, writer, pool, &handler)
+	if err != nil && errors.Cause(err) != io.EOF {
+		return buffer, err
+	}
+	return buffer, nil
+}
+
+func RelayCopy(reader Reader, writer Writer, domain string, options ...CopyOption) (string, error) {
+  newDebugMsg("Buf: RelayCopy " + domain)
+	var handler copyHandler
+	for _, option := range options {
+		option(&handler)
+	}
+	buffer, err := relayCopyInternal(reader, writer, domain, &handler)
 	if err != nil && errors.Cause(err) != io.EOF {
 		return buffer, err
 	}
