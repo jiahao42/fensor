@@ -4,7 +4,8 @@ package db
 
 import (
 	"github.com/gomodule/redigo/redis"
-	"v2ray.com/core/common/db/model"
+  "v2ray.com/core/common/db/model"
+  "v2ray.com/core/common/errors"
 	"time"
 )
 
@@ -41,8 +42,8 @@ func (p *Pool) LookupRecord (URL string) (*model.URLStatus, error) {
 	values, err := redis.Values(conn.Do("HGETALL", URL))
 	err = redis.ScanStruct(values, status)
   //newDebugMsg("DB: lookup for " + URL + ": " + StructString(status))
-	if err != nil {
-		return nil, err
+	if err != nil || status.URL == "" {
+		return nil, errors.New("Record not found")
 	}
 	return status, nil
 }
