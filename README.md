@@ -1,6 +1,8 @@
 # fensor
 
-"fensor" means "f\*\*\* (c)ensor(ship)", it's a tool for circumventing censorship.
+*This project is served as a course project for Computer Network.*
+
+"fensor" means "f\*\*\* censor(ship)", it's a tool for circumventing censorship.
 
 This project is based on [v2ray](https://github.com/v2ray/v2ray-core), and the modifications are mainly guided by the paper [Incentivizing censorship measurements via circumvention](https://dl.acm.org/doi/abs/10.1145/3230543.3230568) from SIGCOMM'18.
 
@@ -14,19 +16,18 @@ Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor 
 | URL status| Circumvention Protocol| 
 | ------------- |:-------------:|
 | DNS blocked (Finished) | [Freedom](https://v2ray.com/en/configuration/protocols/freedom.html) (modified) |
-| TCP conn. blocked/reset (Finished)| [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[VMess](https://v2ray.com/en/configuration/protocols/vmess.html) |
-| Wrong/Blank webpage returned (Under construction) | [Shadowsocks](https://v2ray.com/en/configuration/protocols/shadowsocks.html)/[VMess](https://v2ray.com/en/configuration/protocols/vmess.html) |
+| TCP conn. blocked/reset (Finished)| [VMess](https://v2ray.com/en/configuration/protocols/vmess.html) |
+| Wrong/Blank webpage returned (Under construction) | [VMess](https://v2ray.com/en/configuration/protocols/vmess.html) |
 
-Speficically, fensor composes different protocols to dynamically choose the most appropriate way to circumvent based on domain status stored in the database.
+As the figure shows, if the DNS query from the local DNS server fails, fensor will automatically try to resolve through the global DNS query. If the global DNS query fails as well, it will turn to the relay server. Note that the mechanism is fine-grained to URL, each URL can have different status as shown in the figure, thus different strategy may apply.
 
-<!--![Freedom](./doc/img/v2ray_freedom.png)-->
-<!--![VMess](./doc/img/v2ray_vmess.png)-->
+![](doc/img/mechanism.png)
 
-
-<!--![fensor](./doc/img/fensor.png)-->
 
 ### On protocols - hybrid mode 
-<!--* freedom: add global DNS servers, i.e., when there is no valid response from the local DNS server, it shall turn to -->
+
+![](doc/img/tech_details.png)
+
 Fensor will launch three different instances of server, 
 
 * Free server: connect remote side directly, using the Freedom protocol, which has been modifed to have the abllity of global DNS query.

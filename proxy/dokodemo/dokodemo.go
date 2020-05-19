@@ -174,7 +174,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 				d.relayInitStep++
 			} else {
 				// operate as normal
-				err = buf.Copy(reader, link.Writer, buf.UpdateActivity(timer))
+				err = buf.Copy(reader, relayLink.Writer, buf.UpdateActivity(timer))
 			}
 
 		}
@@ -237,7 +237,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 		}
 		if d.useRelay {
 			if d.relayInitStep == 2 {
-				buf, err := buf.RelayCopy(link.Reader, writer, d.relayInitStep, d.targetAddr, buf.UpdateActivity(timer))
+				buf, err := buf.RelayCopy(relayLink.Reader, writer, d.relayInitStep, d.targetAddr, buf.UpdateActivity(timer))
 				if err != nil {
 					return newError("failed to transport request").Base(err)
 				}
@@ -248,7 +248,7 @@ func (d *DokodemoDoor) Process(ctx context.Context, network net.Network, conn in
 				}
 			} else if d.relayInitStep == 4 {
 				// operate as normal
-				err = buf.Copy(link.Reader, writer, buf.UpdateActivity(timer))
+				err = buf.Copy(relayLink.Reader, writer, buf.UpdateActivity(timer))
 			}
 		}
 		return nil

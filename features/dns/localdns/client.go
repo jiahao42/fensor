@@ -27,9 +27,9 @@ func (*Client) Close() error { return nil }
 
 // TODO: we can use different DNS servers according to user's contury info, see https://public-dns.info/
 var globalDNSServers = []string{
-	"8.8.8.8",
-	"8.8.4.4",
-	"23.226.80.100",
+  "8.8.8.8",
+  "8.8.4.4",
+  "23.226.80.100",
 }
 
 // Lookup IP using global servers
@@ -50,7 +50,7 @@ func (*Client) GlobalLookupIP(host string) []net.IP {
 			switch t := ans.(type) {
 			case *mdns.A:
 				Arecord := ans.(*mdns.A)
-				newDebugMsg("feature: got record " + Arecord.String() + " from " + server)
+				newDebugMsg("feature: got record " + Arecord.String() + " for " + host + " from " + server)
 				ret = append(ret, Arecord.A)
 			default:
 				newDebugMsg("Feature: DNS type " + t.String())
@@ -73,6 +73,7 @@ func (*Client) LookupIP(host string) ([]net.IP, error) {
 		parsed := net.IPAddress(ip)
 		if parsed != nil {
 			parsedIPs = append(parsedIPs, parsed.IP())
+      newDebugMsg("feature: got record " + parsed.String() + " for " + host + " from local DNS server")
 		}
 	}
 	if len(parsedIPs) == 0 {

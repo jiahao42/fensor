@@ -207,7 +207,7 @@ func main() {
 	}
 	configs, err := handleHybridConfig()
 	if err != nil {
-		panic("Load config failed")
+		panic(err.Error())
 	}
 
 	if len(configs) == 1 {
