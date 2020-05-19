@@ -21,12 +21,12 @@ Every URL will be stored as a tuple `(URL, status)` in a Redis database, fensor 
 
 As the figure shows, if the DNS query from the local DNS server fails, fensor will automatically try to resolve through the global DNS query. If the global DNS query fails as well, it will turn to the relay server. Note that the mechanism is fine-grained to URL, each URL can have different status as shown in the figure, thus different strategy may apply.
 
-![](doc/img/mechanism.png)
+<img src="doc/img/mechanism.png" height="300"/>
 
 
 ### On protocols - hybrid mode 
 
-![](doc/img/tech_details.png)
+<img src="doc/img/tech_details.png" height="300"/>
 
 Fensor will launch three different instances of server, 
 
